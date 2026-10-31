@@ -12,9 +12,11 @@ test('one-time recovery codes preserve progress, reject reuse and serialize conc
   process.env.MAIL_FROM = 'LabSprint <recovery@example.test>';
   const originalFetch = globalThis.fetch;
   const mails: { to: string[]; text: string; html: string }[] = [];
+  let mailUnavailable = false;
   globalThis.fetch = async (input, init) => {
     if (String(input) !== 'https://api.resend.com/emails')
       throw new Error('Unexpected test network call');
+    if (mailUnavailable) throw new Error('Synthetic mail outage');
     mails.push(JSON.parse(String(init?.body)));
     return new Response(JSON.stringify({ id: 'test-mail' }), { status: 200 });
   };
@@ -33,14 +35,14 @@ test('one-time recovery codes preserve progress, reject reuse and serialize conc
     const db = await getDb();
     const origin = 'http://127.0.0.1:3000';
     const password = 'Test-only-password-2026';
-    const authRequest = (path: string, body: unknown, cookie?: string) =>
+    const authRequest = (path: string, body: unknown, cookie?: string, ip = '127.0.0.5') =>
       auth.handler(
         new Request(`${origin}/api/auth/${path}`, {
           method: 'POST',
           headers: {
             origin,
             'Content-Type': 'application/json',
-            'x-real-ip': '127.0.0.5',
+            'x-real-ip': ip,
             ...(cookie ? { cookie } : {}),
           },
           body: JSON.stringify(body),
@@ -207,6 +209,11 @@ test('one-time recovery codes preserve progress, reject reuse and serialize conc
       redirectTo: `${origin}/reset-password`,
     });
     assert.equal(resetRequest.status, 200);
+    assert.deepEqual(
+      await resetRequest.json(),
+      await unknownEmail.json(),
+      'Email requests do not reveal registration.',
+    );
     assert.equal(mails.length, 1);
     assert.ok(mails[0].text.includes('30 minutes'));
     const match = mails[0].text.match(
@@ -225,6 +232,95 @@ test('one-time recovery codes preserve progress, reject reuse and serialize conc
     const afterEmailReset = await workspace.getWorkspace(user);
     assert.equal(afterEmailReset.attempts.length, 1);
     assert.deepEqual(afterEmailReset.bookmarks, [question.id]);
+    assert.equal(
+      (await recovery.recoveryStatus(user.id)).remaining,
+      9,
+      'Email reset preserves unused recovery codes.',
+    );
+    const newSessionCookie = newLogin.headers
+      .getSetCookie()
+      .map((value) => value.split(';')[0])
+      .join('; ');
+    assert.equal(
+      (
+        await codeStatus(
+          new Request(`${origin}/api/recovery-codes`, { headers: { cookie: newSessionCookie } }),
+        )
+      ).status,
+      401,
+      'Email reset revokes existing sessions.',
+    );
+    const afterEmailLogin = await authRequest('sign-in/email', {
+      email: 'recover@example.test',
+      password: emailPassword,
+    });
+    assert.equal(afterEmailLogin.status, 200);
+    assert.equal(
+      (await afterEmailLogin.json()).user.id,
+      user.id,
+      'Email reset keeps the original account.',
+    );
+
+    const expiredRequest = await authRequest(
+      'request-password-reset',
+      {
+        email: 'recover@example.test',
+        redirectTo: `${origin}/reset-password`,
+      },
+      undefined,
+      '127.0.0.7',
+    );
+    assert.equal(expiredRequest.status, 200);
+    const expiredToken = mails.at(-1)!.text.match(/\/api\/auth\/reset-password\/([^?\s]+)/)![1];
+    await db
+      .update(tables.verification)
+      .set({ expiresAt: new Date(Date.now() - 60_000) })
+      .where(eq(tables.verification.identifier, `reset-password:${expiredToken}`));
+    const expiredCallback = await auth.handler(
+      new Request(
+        `${origin}/api/auth/reset-password/${expiredToken}?callbackURL=${encodeURIComponent(`${origin}/reset-password`)}`,
+      ),
+    );
+    assert.equal(expiredCallback.status, 302);
+    assert.equal(
+      new URL(expiredCallback.headers.get('location')!).searchParams.get('error'),
+      'INVALID_TOKEN',
+    );
+    assert.equal(
+      (
+        await authRequest('reset-password', {
+          token: expiredToken,
+          newPassword: 'Another-password-2026',
+        })
+      ).status,
+      400,
+      'Expired tokens cannot reset credentials.',
+    );
+
+    mailUnavailable = true;
+    const originalError = console.error;
+    const deliveryDiagnostics: unknown[][] = [];
+    console.error = (...args: unknown[]) => {
+      deliveryDiagnostics.push(args);
+    };
+    try {
+      const unavailable = await authRequest('request-password-reset', {
+        email: 'recover@example.test',
+        redirectTo: `${origin}/reset-password`,
+      });
+      assert.equal(unavailable.status, 200, 'A mail outage must not disclose an existing account.');
+      assert.deepEqual(await unavailable.json(), {
+        status: true,
+        message: 'If this email exists in our system, check your email for the reset link',
+      });
+      assert.deepEqual(
+        deliveryDiagnostics,
+        [['Password-reset email dispatch failed. Check mail service configuration.']],
+        'Only a fixed operational diagnostic is logged.',
+      );
+    } finally {
+      console.error = originalError;
+    }
   } finally {
     globalThis.fetch = originalFetch;
     delete process.env.RESEND_API_KEY;

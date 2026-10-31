@@ -39,16 +39,19 @@ import type { View, Workspace } from './types';
 import { fmt, SubjectIcon, PageHeading, Stat, SubjectCard, QuestionRow, Empty } from './shared';
 import { Practice } from './practice';
 import { ReferenceShelf } from './reference-shelf';
+import { ProgressFacts, ProgressGuide } from './progress-signals';
 export function Dashboard({
   workspace: w,
   name,
   onPractice,
   onView,
+  onResume,
 }: {
   workspace: Workspace;
   name: string;
   onPractice: (v: { subjectId?: string; ids?: string[]; label?: string }) => void;
   onView: (v: View) => void;
+  onResume: () => void;
 }) {
   const p = progressFor(w.attempts),
     first = firstAttempts(w.attempts),
@@ -58,21 +61,23 @@ export function Dashboard({
   const suggestion = suggestedSubject(w.attempts);
   return (
     <>
-      <PageHeading
-        eyebrow="A LITTLE PRACTICE. A STRONGER YOU."
-        title={`Hey ${name}, let’s make progress.`}
-        description="Your next milestone starts with one good study session."
-        action={
-          <span className="date-label">
-            {new Date().toLocaleDateString('en', {
-              weekday: 'short',
-              month: 'short',
-              day: 'numeric',
-            })}
-          </span>
-        }
-      />
-      <div className="hero-grid">
+      <div className="overview-heading">
+        <PageHeading
+          eyebrow="A LITTLE PRACTICE. A STRONGER YOU."
+          title={`Hey ${name}, let’s make progress.`}
+          description="Your next milestone starts with one good study session."
+          action={
+            <span className="date-label">
+              {new Date().toLocaleDateString('en', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </span>
+          }
+        />
+      </div>
+      <div className={`hero-grid ${w.activeSession ? 'has-saved-session' : ''}`}>
         <section className="hero-card">
           <div className="hero-text">
             <span className="hero-kicker">
@@ -89,9 +94,11 @@ export function Dashboard({
             </p>
             <button
               className="button lime"
-              onClick={() => onPractice({ label: 'Daily mixed practice' })}
+              onClick={() =>
+                w.activeSession ? onResume() : onPractice({ label: 'Daily mixed practice' })
+              }
             >
-              Let’s practice <ArrowRight size={18} />
+              {w.activeSession ? 'Resume practice' : 'Start practice'} <ArrowRight size={18} />
             </button>
             <div className="hero-foot">
               <CheckCircle2 size={14} /> All subjects, always open
@@ -120,7 +127,7 @@ export function Dashboard({
             {today}
             <span> / {w.settings.dailyGoal}</span>
           </div>
-          <p>questions answered today</p>
+          <p>{today === 1 ? 'question' : 'questions'} answered today</p>
           <div className="progress-track">
             <span style={{ width: `${Math.min(100, (today / w.settings.dailyGoal) * 100)}%` }} />
           </div>
@@ -140,7 +147,9 @@ export function Dashboard({
           icon={Target}
           label="First-attempt accuracy"
           value={fmt(p.accuracy)}
-          note={p.seen ? `Across ${p.seen} unique questions` : 'Your starting line is here'}
+          note={
+            p.seen ? `${p.firstCorrect}/${p.seen} correct` : 'Unavailable · no first attempts yet'
+          }
           color="purple"
         />
         <Stat
@@ -148,7 +157,7 @@ export function Dashboard({
           label="Question bank explored"
           value={`${p.seen}`}
           suffix={`/ ${p.total}`}
-          note="Unique questions practiced"
+          note={`${p.seen} of ${p.total} questions explored`}
           color="blue"
         />
         <Stat
@@ -167,6 +176,7 @@ export function Dashboard({
           color="green"
         />
       </div>
+      <ProgressGuide stats={p} />
       <section className="subjects-section">
         <div className="section-heading">
           <div>
@@ -255,8 +265,8 @@ export function Dashboard({
         <div className="quiet-note">
           <CircleHelp size={17} />
           <p>
-            Your dashboard starts fresh. As you practice, your real results will appear here.
-            Accuracy and coverage guide your review; they don’t predict an exam score.
+            Your dashboard starts fresh. This starter bank contains {questions.length} questions,
+            rather than the full MTAP or board-exam syllabus.
           </p>
         </div>
       ) : (
@@ -320,15 +330,15 @@ export function SubjectBrowser({
                       disabled={p.total === 0}
                       onClick={() => onPractice({ subjectId: s.id, topic })}
                     >
-                      <span>
+                      <div className="topic-facts">
                         {topic}
                         <small>
                           {p.total
-                            ? `${p.total} questions · ${p.seen} explored`
+                            ? `${p.total} ${p.total === 1 ? 'question' : 'questions'} available`
                             : 'Pending source review'}
                         </small>
-                      </span>
-                      <strong>{fmt(p.accuracy)}</strong>
+                        <ProgressFacts stats={p} />
+                      </div>
                       <ChevronRight size={15} />
                     </button>
                   );
@@ -368,6 +378,8 @@ export function ReviewQueue({
             .filter((a) => a.correct && everMissed.has(a.questionId))
             .map((a) => a.questionId)
         : [...latest.values()].filter((a) => !a.correct).map((a) => a.questionId);
+  const availableIds = ids.filter((id) => questionMap.has(id));
+  const p = progressFor(w.attempts);
   return (
     <>
       <PageHeading
@@ -375,12 +387,12 @@ export function ReviewQueue({
         title="Mistakes are part of the process."
         description="Return to tricky questions. Your original results stay in your history."
         action={
-          ids.length ? (
+          availableIds.length ? (
             <button
               className="button primary"
               onClick={() =>
                 onPractice({
-                  ids,
+                  ids: availableIds,
                   label: tab === 'saved' ? 'Bookmarked questions' : 'Review queue',
                 })
               }
@@ -396,15 +408,16 @@ export function ReviewQueue({
           Needs another look <span>{[...latest.values()].filter((a) => !a.correct).length}</span>
         </button>
         <button className={tab === 'recovered' ? 'active' : ''} onClick={() => setTab('recovered')}>
-          Answered correctly later
+          Previously missed → corrected <span>{p.corrected}</span>
         </button>
         <button className={tab === 'saved' ? 'active' : ''} onClick={() => setTab('saved')}>
           Bookmarks <Bookmark size={15} />
         </button>
       </div>
-      {ids.length ? (
+      <ProgressGuide stats={p} />
+      {availableIds.length ? (
         <div className="question-list">
-          {ids.map((id) => {
+          {availableIds.map((id) => {
             const q = questionMap.get(id);
             return q ? (
               <QuestionRow
@@ -456,14 +469,16 @@ export function Progress({ workspace: w }: { workspace: Workspace }) {
           icon={Target}
           label="First-attempt accuracy"
           value={fmt(p.accuracy)}
-          note={`${p.seen} unique questions`}
+          note={
+            p.seen ? `${p.firstCorrect}/${p.seen} correct` : 'Unavailable · no first attempts yet'
+          }
           color="purple"
         />
         <Stat
           icon={TrendingUp}
           label="Repeat accuracy"
           value={fmt(p.repeatAccuracy)}
-          note={`${p.attempts - p.seen} repeat attempts`}
+          note={`${p.repeatCorrect}/${p.repeatCount} correct · ${p.repeatCount} repeat ${p.repeatCount === 1 ? 'attempt' : 'attempts'}`}
           color="green"
         />
         <Stat
@@ -481,6 +496,7 @@ export function Progress({ workspace: w }: { workspace: Workspace }) {
           color="orange"
         />
       </div>
+      <ProgressGuide stats={p} />
       <section className="panel trend-panel">
         <div className="section-heading">
           <div>
@@ -494,7 +510,10 @@ export function Progress({ workspace: w }: { workspace: Workspace }) {
           role="img"
           tabIndex={0}
           aria-label={days
-            .map((d) => `${d.label}: ${d.count} questions, accuracy ${fmt(d.accuracy)}`)
+            .map(
+              (d) =>
+                `${d.label}: ${d.count} ${d.count === 1 ? 'question' : 'questions'}, first-attempt accuracy ${fmt(d.accuracy)}, ${d.correct}/${d.count} correct`,
+            )
             .join('; ')}
         >
           {days.map((d) => (
@@ -504,14 +523,18 @@ export function Progress({ workspace: w }: { workspace: Workspace }) {
                 <div style={{ height: `${(d.count / max) * 100}%`, minHeight: d.count ? 8 : 0 }} />
               </div>
               <strong>{d.label}</strong>
-              <small>{fmt(d.accuracy)}</small>
+              <small>
+                {fmt(d.accuracy)}
+                <br />
+                {d.correct}/{d.count}
+              </small>
             </div>
           ))}
         </div>
         <div className="chart-key">
           <span />
           New questions <span className="muted-key" />
-          Accuracy shown beneath each day
+          First-attempt accuracy · correct/answered beneath each day
         </div>
       </section>
       <div className="section-heading">
@@ -532,24 +555,31 @@ export function Progress({ workspace: w }: { workspace: Workspace }) {
                 <div>
                   <h3>{s.name}</h3>
                   <p>
-                    {sp.seen}/{sp.total} explored · {sp.needsReview} to revisit
+                    First-attempt accuracy:{' '}
+                    {sp.seen
+                      ? `${fmt(sp.accuracy)} · ${sp.firstCorrect}/${sp.seen} correct`
+                      : 'Unavailable · no first attempts yet'}
+                  </p>
+                  {sp.limitedData ? <p>Limited practice data · small sample.</p> : null}
+                  <p>
+                    {sp.seen} of {sp.total} questions explored · {sp.needsReview} to revisit
                   </p>
                 </div>
-                <strong>{fmt(sp.accuracy)}</strong>
                 <ChevronRight size={18} />
               </summary>
               <div className="topic-detail">
+                <ProgressFacts stats={sp} />
                 {s.topics.map((t) => {
                   const tp = progressFor(w.attempts, s.id, t);
                   return (
                     <div className="topic-row" key={t}>
-                      <span>
+                      <div className="topic-facts">
                         {t}
                         <small>
-                          {tp.seen}/{tp.total} explored
+                          {tp.total} {tp.total === 1 ? 'question' : 'questions'} available
                         </small>
-                      </span>
-                      <strong>{fmt(tp.accuracy)}</strong>
+                        <ProgressFacts stats={tp} />
+                      </div>
                     </div>
                   );
                 })}
@@ -630,7 +660,9 @@ export function QuestionLibrary({
         </select>
       </div>
       <div className="library-result-count">
-        <span>{filtered.length} questions</span>
+        <span>
+          {filtered.length} {filtered.length === 1 ? 'question' : 'questions'}
+        </span>
         {filtered.length ? (
           <button
             className="text-button"
@@ -755,7 +787,7 @@ export function Preferences({
               Spot something unclear? Flag it from the answer explanation. Question IDs and versions
               make corrections traceable.
             </p>
-            <span className="pill">LabSprint v0.2 · Test edition</span>
+            <span className="pill">LabSprint v0.3.0 · Starter bank</span>
           </section>
           <button className="button secondary" onClick={onSignOut}>
             <LogOut size={17} />

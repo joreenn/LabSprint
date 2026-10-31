@@ -4,7 +4,19 @@
 
 If credits or tool approvals become unavailable, stop at the current checkpoint and wait for the user to return. Resume from saved work; do not restart completed implementation, migrations, or deployments unnecessarily. Do not bypass an unavailable approval check.
 
-## Completed release
+## Version 0.3.0 publication in progress
+
+The five requested priorities are implemented and verified. On 1 November 2026 the owner authorized committing/pushing this update and deploying it to the existing production domain. Publication is in progress; do not treat this checkpoint as confirmation of a successful deployment until its READY state and hosted checks are recorded. No schema migration or external authentication-setting change is needed.
+
+- Detailed behavior, inspection findings, and verification: `USABILITY-UPDATE.md`.
+- Final `npm test`: **32 passed, zero failed**. Production build including TypeScript passed. Formatting passed. `npm run content:check` passed: 56 questions, 42 topics, two empty topics, 27 single-question topics.
+- Browser checks at 320px and 390px phone, 768px tablet, and 1366px desktop. Wrong → correct retry preserved 0/1 baseline and one-question coverage; correction and cleared missed queue were visible separately. Bookmark, refresh/resume, concise single-question review, actual multi-session sizes, zero-match handling, repeat recap, and read-only explanation inspection passed. Recovery unavailable/invalid-link states were checked; browser warning/error log was empty.
+- Saved question-version metadata is exposed for accurate version-aware recaps. No question content, ID, version, database schema, or dependency was changed.
+- Local browser QA used only `tmp/usability-preview-data`, a separate ignored test database. Existing learner data was not used. The preview server was stopped; the viewport override was reset. Screenshots: `docs/screenshots/usability-desktop.jpg` and `usability-phone.jpg`.
+- Real email delivery remains unverified until a verified sender/domain and server-only service credentials are configured. Exact setup and verification steps: `ACCOUNT-RECOVERY.md`. No verification requirement was switched on for existing accounts.
+- No required implementation work remains. Physical-device QA and reviewed content expansion remain separate future work.
+
+## Existing production release (unchanged)
 
 - LabSprint 0.2.1 is live at https://labsprint.vercel.app.
 - Final production deployment: `dpl_FuymBRnh5M893wfTFFzZSHMdw4VK`, confirmed READY with the production domain assigned and no alias error.

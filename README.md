@@ -6,6 +6,8 @@ This is a test project with a deliberately small, source-checked starter questio
 
 ## 31 October update
 
+Version 0.3.0 adds clearer progress definitions, content checks, compact mobile practice, question-level recaps, and improved recovery states. See the [update notes](docs/USABILITY-UPDATE.md) and run `npm run content:check` to inspect bank structure. Release publication and hosted verification are tracked in [the work checkpoint](docs/WORK-STATE.md).
+
 Version 0.2.1 improves laptop and phone readability with a shared relative type scale, larger practice text, responsive cards, and larger touch controls. See the [typography update](docs/TYPOGRAPHY-2026-10-31.md) and [current release checkpoint](docs/WORK-STATE.md).
 
 The 0.2 update adds faster answer and next-question interactions, 20 previewable color palettes and custom gradients, optional study timers, password visibility, and account recovery with saved one-time codes. The bank now contains 56 original questions. See the [update notes](docs/UPDATES-2026-10-31.md) for behavior, migration details, and verification status.

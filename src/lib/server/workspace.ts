@@ -22,6 +22,7 @@ export function toAttempt(row: typeof tables.attempts.$inferSelect): Attempt {
     questionId: row.questionId,
     optionId: row.optionId,
     correct: row.correct,
+    questionVersion: row.questionVersion,
     createdAt: row.createdAt.toISOString(),
   };
 }

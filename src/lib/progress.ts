@@ -6,9 +6,16 @@ export type AttemptRecord = {
   questionId: string;
   optionId: string;
   correct: boolean;
+  questionVersion?: number;
   createdAt: string;
 };
 export const questionMap = new Map(questions.map((q) => [q.id, q]));
+// A UI convention for a small sample, not a validated mastery or readiness threshold.
+// Count unique first attempts within the currently displayed subject/topic/bank.
+export const LIMITED_PRACTICE_THRESHOLD = 5;
+export const LIMITED_PRACTICE_EXPLANATION = `Based on fewer than ${LIMITED_PRACTICE_THRESHOLD} first attempts; a small sample.`;
+export const CORRECTION_EXPLANATION =
+  'A correction shows practice improvement, not lasting mastery.';
 export const percent = (correct: number, total: number) =>
   total ? Math.round((correct / total) * 100) : null;
 export function firstAttempts(attempts: AttemptRecord[]) {
@@ -37,14 +44,27 @@ export function progressFor(attempts: AttemptRecord[], subjectId?: string, topic
   const all = attempts.filter((a) => ids.has(a.questionId));
   const first = firstAttempts(all);
   const latest = latestAttempts(all);
+  const firstIds = new Set(first.map((a) => a.id));
+  const repeats = all.filter((a) => !firstIds.has(a.id));
+  const firstCorrect = first.filter((a) => a.correct).length;
+  const repeatCorrect = repeats.filter((a) => a.correct).length;
+  // A latest correct answer must follow a recorded wrong answer. If the learner
+  // misses it again later, it belongs in the missed queue rather than this count.
+  const missedIds = new Set(all.filter((a) => !a.correct).map((a) => a.questionId));
+  const corrected = [...latest.values()].filter(
+    (a) => a.correct && missedIds.has(a.questionId),
+  ).length;
   return {
     total: bank.length,
     seen: first.length,
-    accuracy: percent(first.filter((a) => a.correct).length, first.length),
-    repeatAccuracy: percent(
-      all.filter((a) => !first.some((f) => f.id === a.id) && a.correct).length,
-      all.length - first.length,
-    ),
+    firstCorrect,
+    accuracy: percent(firstCorrect, first.length),
+    coverage: percent(first.length, bank.length),
+    repeatCount: repeats.length,
+    repeatCorrect,
+    repeatAccuracy: percent(repeatCorrect, repeats.length),
+    corrected,
+    limitedData: first.length > 0 && first.length < LIMITED_PRACTICE_THRESHOLD,
     attempts: all.length,
     needsReview: [...latest.values()].filter((a) => !a.correct).length,
   };
@@ -64,6 +84,7 @@ export function dailyProgress(attempts: AttemptRecord[], now = new Date()) {
       day,
       label: d.toLocaleDateString('en', { weekday: 'short' }),
       count: items.length,
+      correct: items.filter((a) => a.correct).length,
       accuracy: percent(items.filter((a) => a.correct).length, items.length),
     };
   });
@@ -72,7 +93,10 @@ export function suggestedSubject(attempts: AttemptRecord[]) {
   return [...subjects].sort((a, b) => {
     const x = progressFor(attempts, a.id),
       y = progressFor(attempts, b.id);
-    return y.needsReview - x.needsReview || x.seen / x.total - y.seen / y.total;
+    return (
+      y.needsReview - x.needsReview ||
+      (x.total ? x.seen / x.total : 0) - (y.total ? y.seen / y.total : 0)
+    );
   })[0];
 }
 export function shuffled<T>(items: T[]) {

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -32,26 +32,49 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
   const [recovered, setRecovered] = useState(false);
   const [recoveryMethod, setRecoveryMethod] = useState<'code' | 'email'>('code');
   const [recoveryEnabled, setRecoveryEnabled] = useState<boolean | null>(null);
+  const [recoveryStatusError, setRecoveryStatusError] = useState(false);
+  const [recoveryStatusCheck, setRecoveryStatusCheck] = useState(0);
+  const recoveryMethodChosen = useRef(false);
   const [appearance, setAppearance] = useState<Appearance>(defaultAppearance);
   const [customized, setCustomized] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const signup = mode === 'signup';
   const recover = mode === 'recover';
+  const submitLabel = busy
+    ? recover
+      ? recoveryMethod === 'code'
+        ? 'Recovering account…'
+        : 'Requesting reset link…'
+      : signup
+        ? 'Creating account…'
+        : 'Signing in…'
+    : recover
+      ? recoveryMethod === 'code'
+        ? 'Recover my account'
+        : 'Request reset link'
+      : signup
+        ? 'Create my account'
+        : 'Sign in';
 
   useEffect(() => {
     if (!recover) return;
     const controller = new AbortController();
+    setRecoveryEnabled(null);
+    setRecoveryStatusError(false);
     void fetch('/api/recovery-status', { signal: controller.signal, cache: 'no-store' })
       .then((response) => {
         if (!response.ok) throw new Error('Unavailable');
         return response.json();
       })
-      .then((data) => setRecoveryEnabled(data.enabled === true))
+      .then((data) => {
+        setRecoveryEnabled(data.enabled === true);
+        if (data.enabled === true && !recoveryMethodChosen.current) setRecoveryMethod('email');
+      })
       .catch(() => {
-        if (!controller.signal.aborted) setRecoveryEnabled(false);
+        if (!controller.signal.aborted) setRecoveryStatusError(true);
       });
     return () => controller.abort();
-  }, [recover]);
+  }, [recover, recoveryStatusCheck]);
 
   const switchMode = (next: AuthMode) => {
     setMode(next);
@@ -59,6 +82,7 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
     setSent(false);
     setRecovered(false);
     setShowPassword(false);
+    recoveryMethodChosen.current = false;
   };
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -70,6 +94,12 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
     try {
       if (recover) {
         if (recoveryMethod === 'email') {
+          if (!recoveryEnabled) {
+            setError(
+              'Email recovery is unavailable. Use a saved recovery code or check availability again.',
+            );
+            return;
+          }
           const result = await authClient.requestPasswordReset({
             email,
             redirectTo: new URL('/reset-password', window.location.origin).href,
@@ -189,28 +219,53 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
                 : 'Pick up where you left off. One question at a time.'}
           </p>
           {recover && !recovered && !sent ? (
-            <div className="recovery-methods">
+            <div className="recovery-methods" role="group" aria-label="Recovery method">
               <button
                 className={recoveryMethod === 'code' ? 'active' : ''}
                 type="button"
+                aria-pressed={recoveryMethod === 'code'}
+                disabled={busy}
                 onClick={() => {
+                  recoveryMethodChosen.current = true;
                   setRecoveryMethod('code');
                   setError('');
                 }}
               >
                 <KeyRound size={14} /> Recovery code
               </button>
-              {recoveryEnabled ? (
+              <button
+                className={recoveryMethod === 'email' ? 'active' : ''}
+                type="button"
+                aria-pressed={recoveryMethod === 'email'}
+                disabled={busy || !recoveryEnabled}
+                onClick={() => {
+                  recoveryMethodChosen.current = true;
+                  setRecoveryMethod('email');
+                  setError('');
+                }}
+              >
+                <Mail size={14} />
+                Email link
+              </button>
+            </div>
+          ) : null}
+          {recover && !recovered && !sent ? (
+            <div className="recovery-availability" role="status" aria-live="polite">
+              {recoveryEnabled === null && !recoveryStatusError
+                ? 'Checking email recovery availability…'
+                : recoveryStatusError
+                  ? 'Could not check email recovery. Your saved recovery codes still work.'
+                  : recoveryEnabled
+                    ? 'Choose an email reset link or a recovery code you saved.'
+                    : 'Email reset is not enabled for this deployment. Use a recovery code you saved earlier.'}
+              {recoveryStatusError ? (
                 <button
-                  className={recoveryMethod === 'email' ? 'active' : ''}
                   type="button"
-                  onClick={() => {
-                    setRecoveryMethod('email');
-                    setError('');
-                  }}
+                  className="text-button"
+                  disabled={busy}
+                  onClick={() => setRecoveryStatusCheck((value) => value + 1)}
                 >
-                  <Mail size={14} />
-                  Email link
+                  Check again
                 </button>
               ) : null}
             </div>
@@ -236,20 +291,41 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
               <Mail size={22} />
               <div>
                 <p>
-                  If an account uses that email, you’ll receive a password-reset link. Check your
-                  inbox and spam folder.
+                  Request received. If this email belongs to a LabSprint account and the email
+                  service is available, a reset link will arrive. Check your inbox and spam folder.
                 </p>
                 <p>The link expires in 30 minutes and works once.</p>
+                <p>
+                  Delivery is not confirmed here. If no link arrives, try again later or use a saved
+                  recovery code.
+                </p>
+                <button
+                  className="text-button"
+                  type="button"
+                  onClick={() => {
+                    setSent(false);
+                    setRecoveryMethod('code');
+                  }}
+                >
+                  Use a recovery code
+                </button>
               </div>
             </div>
           ) : (
-            <form onSubmit={submit}>
+            <form
+              onSubmit={submit}
+              aria-busy={busy}
+              onChange={() => {
+                if (recover) recoveryMethodChosen.current = true;
+              }}
+            >
               {signup ? (
                 <label>
                   Your name
                   <input
                     autoComplete="name"
                     name="name"
+                    aria-describedby={error ? 'auth-error' : undefined}
                     placeholder="What should we call you?"
                     minLength={2}
                     maxLength={80}
@@ -261,6 +337,7 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
                 Email address
                 <input
                   name="email"
+                  aria-describedby={error ? 'auth-error' : undefined}
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
@@ -273,6 +350,7 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
                   One unused recovery code
                   <input
                     name="code"
+                    aria-describedby={`recovery-code-help${error ? ' auth-error' : ''}`}
                     type="text"
                     autoComplete="off"
                     autoCapitalize="characters"
@@ -281,7 +359,9 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
                     maxLength={100}
                     required
                   />
-                  <small>Create recovery codes in Preferences while you’re signed in.</small>
+                  <small id="recovery-code-help">
+                    Create recovery codes in Preferences while you’re signed in.
+                  </small>
                 </label>
               ) : null}
               {!recover || recoveryMethod === 'code' ? (
@@ -290,6 +370,10 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
                   <span className="password-field">
                     <input
                       name="password"
+                      aria-describedby={
+                        `${signup || recover ? 'auth-password-help ' : ''}${error ? 'auth-error' : ''}`.trim() ||
+                        undefined
+                      }
                       type={showPassword ? 'text' : 'password'}
                       autoComplete={signup || recover ? 'new-password' : 'current-password'}
                       minLength={signup || recover ? 12 : 1}
@@ -307,6 +391,9 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </span>
+                  {signup || recover ? (
+                    <small id="auth-password-help">Use 12–128 characters.</small>
+                  ) : null}
                 </label>
               ) : null}
               {recover && recoveryMethod === 'code' ? (
@@ -314,6 +401,7 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
                   Confirm new password
                   <input
                     name="confirmPassword"
+                    aria-describedby={error ? 'auth-error' : undefined}
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="new-password"
                     minLength={12}
@@ -348,21 +436,18 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
                 </button>
               ) : null}
               {error ? (
-                <div className="inline-error" role="alert">
+                <div id="auth-error" className="inline-error" role="alert">
                   {error}
                 </div>
               ) : null}
               <button className="button primary wide" disabled={busy}>
                 {busy ? <Loader2 className="spin" size={18} /> : null}
-                {recover
-                  ? recoveryMethod === 'code'
-                    ? 'Recover my account'
-                    : 'Request reset link'
-                  : signup
-                    ? 'Create my account'
-                    : 'Sign in'}
+                {submitLabel}
                 <ArrowRight size={18} />
               </button>
+              <span className="auth-loading-status" role="status" aria-live="polite">
+                {busy ? submitLabel : ''}
+              </span>
             </form>
           )}
           {recover && !recovered ? (
@@ -381,7 +466,7 @@ export function AuthScreen({ initialMode = 'signin' }: { initialMode?: AuthMode 
           ) : !recover ? (
             <p className="auth-switch">
               {signup ? 'Already have an account?' : 'New to LabSprint?'}{' '}
-              <button onClick={() => switchMode(signup ? 'signin' : 'signup')}>
+              <button disabled={busy} onClick={() => switchMode(signup ? 'signin' : 'signup')}>
                 {signup ? 'Sign in' : 'Create an account'}
               </button>
             </p>

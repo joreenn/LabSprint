@@ -10,6 +10,7 @@ export function ResetPassword({ token, invalid }: { token: string; invalid: bool
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+  const [linkInvalid, setLinkInvalid] = useState(invalid);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -23,7 +24,14 @@ export function ResetPassword({ token, invalid }: { token: string; invalid: bool
     try {
       const result = await authClient.resetPassword({ token, newPassword });
       if (result.error) {
-        setError('This reset link is invalid or expired. Please request a new one.');
+        if (result.error.code === 'INVALID_TOKEN') {
+          setLinkInvalid(true);
+          window.history.replaceState(null, '', '/reset-password');
+        } else if (result.error.status === 429) {
+          setError('Too many attempts. Wait a minute before trying again.');
+        } else {
+          setError('We could not update your password. Use 12–128 characters and try again.');
+        }
         return;
       }
       setDone(true);
@@ -56,7 +64,7 @@ export function ResetPassword({ token, invalid }: { token: string; invalid: bool
               Back to sign in
             </a>
           </>
-        ) : invalid ? (
+        ) : linkInvalid ? (
           <>
             <div className="auth-status unavailable" role="alert">
               <ShieldCheck size={22} />
@@ -66,22 +74,23 @@ export function ResetPassword({ token, invalid }: { token: string; invalid: bool
               </p>
             </div>
             <a className="button primary wide" href="/forgot-password">
-              Request a new reset link
+              Choose a recovery method
             </a>
           </>
         ) : (
           <>
-            <p>
+            <p id="reset-password-help">
               Choose a password of at least 12 characters. This link can be used once and expires
               after 30 minutes.
             </p>
-            <form onSubmit={submit}>
+            <form onSubmit={submit} aria-busy={busy}>
               <label>
                 New password
                 <span className="password-field">
                   <input
                     type={show ? 'text' : 'password'}
                     name="password"
+                    aria-describedby={`reset-password-help${error ? ' reset-password-error' : ''}`}
                     autoComplete="new-password"
                     minLength={12}
                     maxLength={128}
@@ -103,6 +112,7 @@ export function ResetPassword({ token, invalid }: { token: string; invalid: bool
                 <input
                   type={show ? 'text' : 'password'}
                   name="confirmPassword"
+                  aria-describedby={error ? 'reset-password-error' : undefined}
                   autoComplete="new-password"
                   minLength={12}
                   maxLength={128}
@@ -110,14 +120,17 @@ export function ResetPassword({ token, invalid }: { token: string; invalid: bool
                 />
               </label>
               {error ? (
-                <div className="inline-error" role="alert">
+                <div id="reset-password-error" className="inline-error" role="alert">
                   {error}
                 </div>
               ) : null}
               <button className="button primary wide" disabled={busy}>
-                {busy ? <Loader2 className="spin" size={18} /> : <ShieldCheck size={18} />}Update
-                password
+                {busy ? <Loader2 className="spin" size={18} /> : <ShieldCheck size={18} />}
+                {busy ? 'Updating password…' : 'Update password'}
               </button>
+              <span className="auth-loading-status" role="status" aria-live="polite">
+                {busy ? 'Updating password…' : ''}
+              </span>
             </form>
           </>
         )}

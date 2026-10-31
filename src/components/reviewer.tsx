@@ -14,6 +14,7 @@ import {
   Play,
   Search,
   Settings2,
+  ShieldCheck,
   Sparkles,
   Sun,
   Timer,
@@ -47,8 +48,10 @@ import {
   type Appearance,
 } from '@/lib/appearance';
 import { StudyTimer } from './reviewer/study-timer';
+import { sessionRecap } from '@/lib/practice-review';
 import { usePracticeOutbox } from './reviewer/use-practice-outbox';
 import './reviewer/update.css';
+import './reviewer/usability.css';
 export default function Reviewer() {
   const { data: session, isPending } = authClient.useSession();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -271,6 +274,7 @@ export default function Reviewer() {
     setSummary(active);
     setActive(null);
     setWorkspace((w) => (w ? { ...w, activeSession: null } : w));
+    window.scrollTo({ top: 0, behavior: 'instant' });
   };
   const answer = (question: Question, optionId: string) => {
     if (!active || active.answers[question.id]) return;
@@ -462,7 +466,7 @@ export default function Reviewer() {
         </header>
         <main
           id="main-content"
-          className={`main-content ${active && view === 'practice' ? 'practice-main' : ''}`}
+          className={`main-content ${active && view === 'practice' ? 'practice-main' : ''} ${view === 'dashboard' ? 'overview-main' : ''}`}
         >
           <div
             className={`sync-strip ${outbox.error ? 'sync-problem' : ''}`}
@@ -492,17 +496,6 @@ export default function Reviewer() {
             <div className="inline-warning">
               Keep this tab open until saving finishes. This browser could not keep a retry copy on
               this device.
-            </div>
-          ) : null}
-          {view === 'dashboard' && recoveryRemaining === 0 ? (
-            <div className="recovery-reminder">
-              <span>
-                <strong>Keep your progress safe.</strong> Save recovery codes in case you forget
-                your password.
-              </span>
-              <button className="text-button" onClick={() => setRecoveryOpen(true)}>
-                Set up recovery <ArrowRight size={15} />
-              </button>
             </div>
           ) : null}
           {error ? (
@@ -535,21 +528,42 @@ export default function Reviewer() {
               </strong>
             </button>
           ) : null}
+          {view === 'dashboard' && recoveryRemaining === 0 ? (
+            <details className="recovery-discovery">
+              <summary>
+                <ShieldCheck size={17} /> Protect your account
+              </summary>
+              <p>
+                Save recovery codes before you need them. Find account recovery anytime in Settings.
+              </p>
+              <button className="text-button" onClick={() => setRecoveryOpen(true)}>
+                Set up recovery <ArrowRight size={15} />
+              </button>
+            </details>
+          ) : null}
           {summary ? (
             <SessionSummary
               session={summary}
+              attempts={workspace.attempts}
+              pendingQuestionIds={outbox.tasks.flatMap((t) =>
+                t.kind === 'answer' && t.sessionId === summary.id ? [t.questionId] : [],
+              )}
+              onNewPractice={(ids) => {
+                setSummary(null);
+                setView('dashboard');
+                setSetup({ ids, label: 'New questions in this bank' });
+              }}
               onDone={() => {
                 setSummary(null);
                 changeView('dashboard');
               }}
               onRedo={() => {
                 setSummary(null);
+                setView('dashboard');
                 setSetup({
-                  ids: summary.questionIds.filter(
-                    (id) =>
-                      summary.answers[id] &&
-                      summary.answers[id] !== questionMap.get(id)?.correctOptionId,
-                  ),
+                  ids: sessionRecap(summary, workspace.attempts)
+                    .filter((row) => !row.correct)
+                    .map((row) => row.question.id),
                   label: 'Session mistakes',
                 });
               }}
@@ -587,6 +601,9 @@ export default function Reviewer() {
               name={firstName}
               onPractice={setSetup}
               onView={changeView}
+              onResume={async () => {
+                if (pendingCount || (await refresh())) changeView('practice');
+              }}
             />
           ) : view === 'subjects' ? (
             <SubjectBrowser workspace={workspace} onPractice={setSetup} />
@@ -627,7 +644,11 @@ export default function Reviewer() {
             <span>
               <FlaskConical size={14} /> LabSprint · Learn a little. Grow a lot.
             </span>
-            <span>{questions.length} original practice questions · Test edition</span>
+            <span>{questions.length} original practice questions · Starter bank</span>
+            <span className="bank-scope">
+              Bank coverage reflects these available questions, not full syllabus coverage or exam
+              readiness.
+            </span>
           </footer>
         </main>
       </div>

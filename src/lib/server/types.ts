@@ -4,6 +4,7 @@ export interface Attempt {
   questionId: string;
   optionId: string;
   correct: boolean;
+  questionVersion?: number;
   createdAt: string;
 }
 

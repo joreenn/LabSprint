@@ -5,6 +5,7 @@ import {
   firstAttempts,
   latestAttempts,
   progressFor,
+  LIMITED_PRACTICE_THRESHOLD,
   type AttemptRecord,
 } from '../src/lib/progress';
 import { questions, subjects } from '../src/content/questions';
@@ -27,6 +28,11 @@ test('first attempts remain separate from repeat improvement, regardless of inpu
   assert.equal(stats.repeatAccuracy, 100);
   assert.equal(stats.needsReview, 0);
   assert.equal(stats.seen, 1);
+  assert.equal(stats.firstCorrect, 0);
+  assert.equal(stats.corrected, 1);
+  assert.equal(stats.repeatCount, 1);
+  assert.equal(stats.repeatCorrect, 1);
+  assert.equal(stats.limitedData, true);
 });
 test('unseen topics have unknown accuracy, not zero or fabricated readiness', () => {
   const stats = progressFor([]);
@@ -34,6 +40,82 @@ test('unseen topics have unknown accuracy, not zero or fabricated readiness', ()
   assert.equal(stats.repeatAccuracy, null);
   assert.equal(stats.seen, 0);
   assert.equal(stats.total, questions.length);
+  assert.equal(stats.firstCorrect, 0);
+  assert.equal(stats.corrected, 0);
+  assert.equal(stats.repeatCount, 0);
+  assert.equal(stats.coverage, 0);
+  assert.equal(stats.limitedData, false);
+});
+test('one correct first attempt shows its denominator and limited sample separately from bank coverage', () => {
+  const q = questions[0];
+  const stats = progressFor([attempt('one', q.id, true, '2026-10-01T12:00:00Z')], q.subjectId);
+  assert.equal(stats.accuracy, 100);
+  assert.equal(stats.firstCorrect, 1);
+  assert.equal(stats.seen, 1);
+  assert.equal(stats.total, questions.filter((item) => item.subjectId === q.subjectId).length);
+  assert.equal(stats.coverage, Math.round(100 / stats.total));
+  assert.equal(stats.limitedData, true);
+  assert.equal(stats.corrected, 0);
+});
+test('multiple retries count once toward coverage and corrections, and a later miss reopens review', () => {
+  const q = questions[0];
+  const records = [
+    attempt('first', q.id, false, '2026-10-01T12:00:00Z'),
+    attempt('retry1', q.id, true, '2026-10-01T12:01:00Z'),
+    attempt('retry2', q.id, true, '2026-10-01T12:02:00Z'),
+  ];
+  const stats = progressFor(records);
+  assert.equal(stats.seen, 1);
+  assert.equal(stats.firstCorrect, 0);
+  assert.equal(stats.accuracy, 0);
+  assert.equal(stats.corrected, 1);
+  assert.equal(stats.repeatCount, 2);
+  assert.equal(stats.repeatCorrect, 2);
+  assert.equal(stats.needsReview, 0);
+  const afterMiss = progressFor([
+    ...records,
+    attempt('miss-again', q.id, false, '2026-10-01T12:03:00Z'),
+  ]);
+  assert.equal(afterMiss.corrected, 0);
+  assert.equal(afterMiss.needsReview, 1);
+  assert.equal(afterMiss.accuracy, 0);
+  assert.equal(afterMiss.seen, 1);
+});
+test('a first-correct question can show later improvement only after an actual miss', () => {
+  const q = questions[0];
+  const records = [
+    attempt('first', q.id, true, '2026-10-01T12:00:00Z'),
+    attempt('miss', q.id, false, '2026-10-01T12:01:00Z'),
+    attempt('corrected', q.id, true, '2026-10-01T12:02:00Z'),
+  ];
+  assert.equal(progressFor(records).corrected, 1);
+  assert.equal(progressFor(records).accuracy, 100);
+});
+test('the central small-sample convention counts unique first attempts, with scope-aware denominators', () => {
+  const records = questions
+    .slice(0, LIMITED_PRACTICE_THRESHOLD)
+    .map((q, i) => attempt(String(i), q.id, true, `2026-10-01T12:0${i}:00Z`));
+  assert.equal(progressFor(records.slice(0, -1)).limitedData, true);
+  assert.equal(progressFor(records).limitedData, false);
+  const q = questions[0];
+  const scoped = progressFor(records, q.subjectId, q.topic);
+  assert.equal(
+    scoped.total,
+    questions.filter((item) => item.subjectId === q.subjectId && item.topic === q.topic).length,
+  );
+  assert.equal(
+    scoped.seen,
+    records.filter(
+      (record) =>
+        questions.find((item) => item.id === record.questionId)?.topic === q.topic &&
+        questions.find((item) => item.id === record.questionId)?.subjectId === q.subjectId,
+    ).length,
+  );
+  const empty = progressFor(records, 'unavailable-subject');
+  assert.equal(empty.total, 0);
+  assert.equal(empty.accuracy, null);
+  assert.equal(empty.coverage, null);
+  assert.equal(empty.limitedData, false);
 });
 test('invalid historical question IDs never inflate coverage', () => {
   assert.equal(

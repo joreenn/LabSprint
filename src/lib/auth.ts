@@ -56,7 +56,20 @@ async function createAuth() {
       autoSignIn: true,
       resetPasswordTokenExpiresIn: 30 * 60,
       revokeSessionsOnPasswordReset: true,
-      sendResetPassword: isRecoveryConfigured() ? sendRecoveryEmail : undefined,
+      sendResetPassword: isRecoveryConfigured()
+        ? async (data) => {
+            try {
+              await sendRecoveryEmail(data);
+            } catch {
+              // Keep the provider's generic response for both known and unknown emails.
+              // A delivery outage must not become an account-existence signal. Never log
+              // the exception, recipient, generated URL, token, or submitted credentials.
+              console.error(
+                'Password-reset email dispatch failed. Check mail service configuration.',
+              );
+            }
+          }
+        : undefined,
     },
     session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 },
     rateLimit: {

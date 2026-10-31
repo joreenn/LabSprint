@@ -20,6 +20,7 @@ import type { Question, Subject } from '@/content/types';
 import { progressFor, type AttemptRecord } from '@/lib/progress';
 import type { View } from './types';
 import { Practice } from './practice';
+import { ProgressFacts } from './progress-signals';
 export const icons: LucideIcon[] = [
   FlaskConical,
   Droplets,
@@ -148,12 +149,10 @@ export function SubjectCard({
       </div>
       <h3>{s.name}</h3>
       <p>
-        {s.topics.length} topics · {p.total} questions
+        {s.topics.length} {s.topics.length === 1 ? 'topic' : 'topics'} · {p.total}{' '}
+        {p.total === 1 ? 'question' : 'questions'}
       </p>
-      <div className="subject-progress">
-        <span>{p.seen ? `${p.seen} explored` : 'Ready when you are'}</span>
-        <strong>{fmt(p.accuracy)}</strong>
-      </div>
+      <ProgressFacts stats={p} />
       <div className={`progress-track tone-track-${subjects.findIndex((x) => x.id === s.id)}`}>
         <span style={{ width: `${p.total ? (p.seen / p.total) * 100 : 0}%` }} />
       </div>

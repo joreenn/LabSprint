@@ -1,0 +1,274 @@
+.progress-facts {
+  display: grid;
+  gap: 0.6rem;
+  text-align: left;
+  color: var(--text);
+  font-size: var(--font-small);
+  line-height: 1.6;
+}
+.baseline-fact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.6rem;
+  align-items: baseline;
+}
+.baseline-fact > span:first-child {
+  width: 100%;
+  color: var(--muted);
+  font-size: var(--font-label);
+}
+.baseline-fact > strong {
+  font-size: var(--font-lead);
+}
+.baseline-fact > span:last-child,
+.coverage-fact {
+  font-size: var(--font-small);
+}
+.progress-facts p {
+  margin: 0;
+  font-size: var(--font-label);
+  line-height: 1.6;
+  display: flex;
+  gap: 0.4rem;
+  color: var(--muted);
+}
+.progress-facts svg,
+.progress-guide svg {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+.subject-card .progress-facts {
+  margin-bottom: 1rem;
+}
+.subject-card {
+  height: auto;
+}
+.subject-expand:not(.expanded) > .subject-card {
+  height: 100%;
+}
+.topic-facts {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+.topic-facts > small {
+  display: block;
+  margin: 0.3rem 0 0.75rem;
+  color: var(--muted);
+}
+.topic-row {
+  align-items: flex-start;
+}
+.topic-row > svg {
+  flex-shrink: 0;
+  margin-top: 0.4rem;
+}
+.topic-detail > .progress-facts {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 0.5rem;
+}
+.progress-guide {
+  margin: 1rem 0 1.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: var(--font-small);
+  line-height: 1.65;
+}
+.progress-guide p {
+  margin: 0;
+}
+.progress-guide p + p {
+  margin-top: 0.65rem;
+}
+.progress-guide p:has(svg) {
+  display: flex;
+  gap: 0.5rem;
+}
+.recovery-discovery {
+  margin: 0.65rem 0 1rem;
+  color: var(--muted);
+  font-size: var(--font-small);
+}
+.recovery-discovery > summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.recovery-discovery > summary::after {
+  content: '+';
+  margin-left: auto;
+}
+.recovery-discovery[open] > summary::after {
+  content: '−';
+}
+.recovery-discovery p {
+  margin: 0.25rem 0;
+}
+.overview-main > .resume-banner {
+  min-height: 4rem;
+  background: var(--button-primary, var(--primary));
+  color: white;
+  border-color: transparent;
+  font-size: var(--font-body);
+}
+.overview-main > .resume-banner strong {
+  font-size: var(--font-body);
+}
+.bank-scope {
+  flex-basis: 100%;
+  font-size: var(--font-label);
+  line-height: 1.6;
+}
+.practice-sizes {
+  margin: 1rem 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.practice-sizes legend {
+  font-size: var(--font-small);
+  margin-bottom: 0.5rem;
+}
+.session-summary {
+  max-width: 900px;
+}
+.summary-next-step {
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--text);
+}
+.summary-recap {
+  text-align: left;
+  margin: 2rem 0;
+}
+.recap-question {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  margin-top: 0.75rem;
+}
+.recap-question > summary {
+  cursor: pointer;
+  min-height: 44px;
+  line-height: 1.6;
+  padding: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.recap-topic {
+  flex: 1;
+  min-width: 12rem;
+}
+.recap-topic strong,
+.recap-topic > span {
+  display: block;
+  font-size: var(--font-small);
+}
+.recap-topic > span {
+  color: var(--muted);
+}
+.recap-result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.4rem;
+  align-items: center;
+  font-size: var(--font-small);
+  max-width: 13rem;
+}
+.recap-result small {
+  flex-basis: 100%;
+  font-size: var(--font-label);
+  color: var(--muted);
+}
+.recap-correct > svg {
+  color: var(--primary);
+}
+.recap-missed > svg {
+  color: var(--text);
+}
+.recap-open-label {
+  font-size: var(--font-label);
+  color: var(--primary);
+  text-decoration: underline;
+}
+.recap-detail {
+  padding: 1rem;
+  border-top: 1px solid var(--line);
+}
+.recap-detail > h3 {
+  margin-bottom: 1rem;
+}
+.summary-recap .takeaway {
+  text-align: left;
+}
+@media (max-width: 700px) {
+  .overview-main .overview-heading .eyebrow,
+  .overview-main .overview-heading .page-heading p {
+    display: none;
+  }
+  .overview-main .overview-heading h1 {
+    font-size: 1.5rem;
+  }
+  .overview-main .overview-heading .page-heading {
+    margin-bottom: 1rem;
+  }
+  .overview-main .hero-grid {
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .overview-main .hero-card {
+    min-height: 0;
+  }
+  .overview-main .hero-text {
+    padding: 1.25rem;
+    max-width: 100%;
+  }
+  .overview-main .hero-card h2 {
+    font-size: 1.5rem;
+    margin: 0 0 1rem;
+  }
+  .overview-main .hero-card p,
+  .overview-main .hero-kicker,
+  .overview-main .hero-foot,
+  .overview-main .hero-art {
+    display: none;
+  }
+  .overview-main .has-saved-session .hero-card {
+    display: none;
+  }
+  .overview-main .goal-card {
+    padding: 1rem;
+  }
+  .overview-main > .resume-banner {
+    margin: 0.75rem 0;
+    padding: 1rem;
+  }
+  .progress-guide {
+    padding: 1rem;
+  }
+  .topic-facts .progress-facts {
+    gap: 0.5rem;
+  }
+  .subject-details > summary {
+    gap: 0.75rem;
+  }
+  .subject-details > summary > div {
+    min-width: 0;
+  }
+  .subject-details > summary p {
+    overflow-wrap: anywhere;
+  }
+  .recap-detail,
+  .recap-question > summary {
+    padding: 0.9rem;
+  }
+}
