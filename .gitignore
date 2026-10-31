@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.data/
+.env*
+!.env.example
+tmp/
+*.tsbuildinfo
+test-results/
+.vercel/
+*.pdf
+*.PDF
+docs/screenshots/

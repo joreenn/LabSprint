@@ -1,0 +1,305 @@
+.password-field {
+  position: relative;
+  display: block;
+  margin-top: 7px;
+}
+.password-field input {
+  margin-top: 0;
+  padding-right: 51px;
+}
+.password-toggle {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+.password-toggle:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+.forgot-link {
+  align-self: flex-end;
+  margin-top: -12px;
+  font-size: var(--font-small);
+  text-decoration: none;
+  color: var(--primary);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.auth-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--primary-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 17px;
+  font-size: var(--font-body);
+  line-height: 1.65;
+  color: var(--text);
+}
+.auth-status svg {
+  color: var(--primary);
+  margin-top: 3px;
+}
+.auth-status p + p {
+  margin-top: 9px;
+}
+.auth-status.unavailable {
+  background: var(--bg);
+  color: var(--muted);
+}
+.auth-form-wrap .auth-back {
+  margin-top: 18px;
+}
+.signup-colors {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px;
+  min-height: 72px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  text-align: left;
+  font-size: var(--font-small);
+}
+.signup-colors > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.signup-colors small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+.signup-color-chip {
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--surface);
+  border-radius: 9px;
+  box-shadow: 0 0 0 1px var(--line);
+  flex-shrink: 0;
+}
+.reset-page {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 35px 20px;
+  background: radial-gradient(ellipse at top, var(--primary-soft), var(--bg) 70%);
+}
+.reset-card {
+  width: 100%;
+  max-width: 520px;
+  padding: 33px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+.reset-card .brand {
+  margin-bottom: 33px;
+}
+.reset-card h1 {
+  font-size: var(--font-page);
+  line-height: 1.4;
+  margin: 10px 0;
+}
+.reset-card > p {
+  color: var(--muted);
+  font-size: var(--font-body);
+  line-height: 1.65;
+  margin-bottom: 24px;
+}
+.reset-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.reset-card label {
+  font-size: var(--font-body);
+}
+.reset-card .auth-status {
+  margin: 22px 0;
+}
+.reset-back {
+  margin-top: 20px;
+  font-size: var(--font-body);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  min-height: 44px;
+}
+.recovery-codes-panel {
+  min-width: 0;
+}
+.recovery-panel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 13px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  margin-bottom: 13px;
+}
+.recovery-codes-panel h2 {
+  font-size: var(--font-section);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.recovery-codes-panel > p {
+  color: var(--muted);
+  font-size: var(--font-body);
+  line-height: 1.65;
+  margin-bottom: 17px;
+}
+.recovery-codes-panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+.recovery-codes-panel form label {
+  font-size: var(--font-body);
+}
+.recovery-codes-panel form > .button {
+  align-self: flex-start;
+}
+.recovery-current-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-small);
+  color: var(--muted);
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 11px;
+  line-height: 1.6;
+}
+.recovery-code-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--muted);
+  font-size: var(--font-small);
+  line-height: 1.65;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 12px;
+  margin: 15px 0;
+}
+.recovery-code-warning svg {
+  color: var(--primary);
+  margin-top: 2px;
+}
+.recovery-code-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+  margin: 16px 0;
+}
+.recovery-code-grid > code {
+  display: block;
+  padding: 10px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  line-height: 1.8;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  user-select: all;
+}
+.recovery-code-grid > code > span {
+  display: inline-block;
+  user-select: none;
+  color: var(--muted);
+  font-size: var(--font-caption);
+  min-width: 24px;
+}
+.recovery-code-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.recovery-code-actions .button {
+  font-size: var(--font-small);
+  min-height: 48px;
+}
+.recovery-notice {
+  color: var(--primary) !important;
+  font-size: var(--font-small) !important;
+}
+.recovery-confirm {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: var(--font-small);
+  margin: 20px 0 15px;
+  min-height: 44px;
+  line-height: 1.6;
+}
+.recovery-confirm input {
+  width: 17px;
+  height: 17px;
+  min-height: 17px;
+  margin: 0;
+  accent-color: var(--primary);
+}
+.recovery-methods {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 19px 0;
+}
+.recovery-methods button {
+  flex: 1;
+  padding: 10px 8px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: var(--font-small);
+  color: var(--muted);
+}
+.recovery-methods button.active {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+@media (max-width: 700px) {
+  .reset-card {
+    padding: 27px 23px;
+  }
+  .reset-card input {
+    font-size: 1rem;
+  }
+  .password-toggle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .signup-colors {
+    min-height: 72px;
+  }
+}

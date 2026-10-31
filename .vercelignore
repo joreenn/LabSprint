@@ -1,0 +1,13 @@
+.data/
+.env*
+tmp/
+*.pdf
+*.PDF
+.next/
+node_modules/
+.git/
+.agents/
+.codex/
+docs/screenshots/
+test-results/
+*.tsbuildinfo

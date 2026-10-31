@@ -1,0 +1,102 @@
+# LabSprint verification records
+
+## Version 0.2 — 31 October 2026
+
+Production [labsprint.vercel.app](https://labsprint.vercel.app) is READY on deployment `dpl_2ZuThDztLHFM4eQQ94ChQNJc9rZ9`. Vercel's build completed in 39 seconds from an allowlist of 61 source/configuration files. Hosted migrations 2 (appearance) and 3 (recovery-code hashes) were applied additively. Existing learner accounts and history were not replaced.
+
+### Automated and build evidence
+
+- Production build passed.
+- An 18-test full suite passed. An additional appearance-contrast regression was then added, and four focused appearance tests passed. The current suite contains 19 tests, but these checks are not recorded as a single full 19-test run.
+- Theme tests include light/dark contrast and custom color extremes; timer tests cover timestamp-based elapsed time, pause/resume, phase transitions, and viewport clamping.
+- Backend coverage includes atomic score/checkpoint behavior, account isolation, stale-session protections, recovery-code hashing, code reuse rejection, and retained learner history.
+
+### Local browser evidence
+
+Device-sized browser testing used 386/390-pixel phone widths; no physical phone or tablet was used for these checks.
+
+- Optional pink signup personalization opened a dashboard/practice preview and applied the selected palette.
+- Canceling a palette preview left the saved appearance unchanged.
+- Show/hide password controls were inspected.
+- Pointer dragging changed the floating timer position; minimize, pause, and custom technique controls worked.
+- Immediate answer rationale and an enabled Next control were observed before waiting for the server save. A tool-action duration is not a server-latency benchmark and no numeric latency improvement is claimed.
+- The recovery form was inspected in the browser. The complete reset was exercised through the hosted API with a synthetic QA account, not by resetting a real learner.
+
+### Hosted HTTP evidence
+
+- Registered a synthetic account on the canonical production origin.
+- Submitted one answer POST and verified the authoritative score and saved session checkpoint.
+- Saved a bookmark and account appearance.
+- Generated 10 recovery codes, used one for a password reset, and confirmed that the old session was revoked.
+- Signed in with the new password and confirmed the same user ID, original attempt, bookmark, active practice session, and appearance were preserved.
+- Confirmed nine codes remained and reuse of the consumed code returned HTTP 400.
+
+- Signed in through the live browser after the reset and verified the personalized dashboard and floating timer. Browser error/warning logs were empty.
+- The production request scan returned zero HTTP 500-or-higher responses for the preceding 15 minutes.
+- Removed the exact synthetic hosted and local update-test accounts. Real learner accounts were not targeted.
+- Saved the live preview below before removing the hosted test account. No recovery codes or passwords are shown.
+
+![LabSprint 0.2 with a test account, pink theme, and floating study timer](screenshots/labsprint-v02.jpg)
+
+### Limits
+
+The 56-question starter bank remains limited and needs independent MLS expert review. Standalone Strasinger and Rodak files were not supplied; their coverage remains pending verified source access. Email recovery is disabled because no verified email domain/provider is configured and the owner chose recovery codes. Full offline use, physical-device cross-platform checks, and long-term monitoring are outside this evidence. There is no claim that every queued-save failure scenario or device background restriction has been exercised on real hardware.
+
+The records below preserve the initial release evidence and its original question count.
+
+---
+
+## Initial release — 30 October 2026
+
+This record covers the initial local Windows build and the later Vercel/Neon production deployment. No Windows security settings were changed.
+
+## Automated checks
+
+- `npm run build`: passed with Next.js 16.4.3 / Webpack, including TypeScript and production page generation.
+- `npm test`: 6 tests passed. The backend integration test contains assertions for real password hashing and cookie sessions, sign-out invalidation, login rate limiting, unauthorized access, hostile origins, account isolation, input validation, server scoring, concurrent duplicate submissions, bookmarks, reports, preferences, and cross-device session conflicts.
+- Progress tests verify separate first/repeat accuracy, empty-state handling, unique coverage, and daily first-attempt counts.
+- Content structure test verifies all seven groups have items, unique IDs, valid subject/topic tags, four explained options, a valid key, and source metadata. This is not clinical expert validation.
+- `npm run format:check`: passed before the final unchanged-format build.
+- Dependency installation reported zero known audit vulnerabilities at installation time. This is not a guarantee against undiscovered vulnerabilities.
+
+## Browser checks
+
+Used a synthetic local QA account, separate from any real learner. Its 3 practice attempts are test data and are not attributed to the project owner.
+
+- Created an account through the interface and loaded a fresh dashboard.
+- At 390 × 844, started a five-question mixed session and submitted both wrong and correct answers.
+- Verified disabled answer buttons after submission, all four rationales, takeaway, reference title/section/PDF page, and question ID/version.
+- Bookmarked a missed question, paused, refreshed the page, and found both saved history and the missed question.
+- Redid the missed question in a new one-question session, answered correctly, and finished the session summary.
+- Verified the review count decreased to zero while first-attempt accuracy stayed 50% and repeat accuracy became 100%.
+- At 834 × 1112, checked the progress layout and icon navigation. No horizontal overflow was observed (document width 819 px in an 834 px viewport).
+- Checked the desktop overview at the browser's default width. Browser error/warning log was empty after the corrected flow.
+- Started the optimized production server and verified the account and saved overview loaded again. The preview image is from this production build.
+
+The browser check caught a local origin mismatch between `localhost` and `127.0.0.1`. The fix shares the authentication trust list with application mutations. A regression test now covers it while preserving rejection of hostile and cross-site requests.
+
+## Scope not verified
+
+No physical iPhone, Android phone, or iPad was used; device-sized browser layouts were tested. Hosted verification is recorded below; real cross-device networking on physical devices remains unverified. Offline behavior and email recovery remain unimplemented. The 42-item bank needs independent MLS expert review and expansion; Philippine Medtech Laws remains pending.
+
+On the loopback-only production preview, Better Auth reported no client-IP header and used its shared per-path rate-limit bucket. Vercel supplies the configured `x-real-ip` header; verify this on the actual deployment. Rate limiting stays enabled locally.
+
+## Hosted verification — 30 October 2026
+
+Production [labsprint.vercel.app](https://labsprint.vercel.app) is READY on Vercel with a production-only Neon Free database. The initial hosted migration was applied before testing.
+
+- Registered a synthetic QA account on the public canonical origin and loaded the overview.
+- Searched for `cuvette`, selected the single matching question, and submitted the correct answer.
+- Verified all four rationales and the source reference, saved a bookmark, and paused the session.
+- Reloaded the page and confirmed the saved resume banner retained `1/1` answered.
+- Signed out and removed only the synthetic account using its exact email and name; no real users were changed.
+- Browser error/warning log was empty. The CLI request scan found zero HTTP 500-or-higher records in the preceding 15 minutes.
+- Runtime logs contained three `pg` SSL-mode future-compatibility warnings, without failed requests. No external monitoring or log drains are configured.
+
+This confirms the hosted browser-to-API-to-database flow. It does not replace testing on physical mobile devices, independent content review, or long-term monitoring. Offline support and email recovery remain unimplemented.
+
+![Live LabSprint production preview](screenshots/labsprint-live.jpg)
+
+## Local preview
+
+![LabSprint production overview using a synthetic QA account](screenshots/labsprint-overview.jpg)
