@@ -28,7 +28,7 @@ The optional email flow uses the canonical `BETTER_AUTH_URL`, a library-generate
 
 ### Remaining setup and delivery verification
 
-This update changes repository code only. No external service, secret, production data, authentication setting, or deployment was changed.
+The recovery implementation does not change external mail services, secrets, or authentication settings. Publication of the application is tracked separately in `WORK-STATE.md`; email delivery still needs the setup and verification below.
 
 1. In Resend, verify a domain the owner controls and complete its required DNS records. Use a sender on that verified domain; a sender string alone does not prove it is verified.
 2. Configure server-only `RESEND_API_KEY` and `MAIL_FROM` for the intended environment. Keep `BETTER_AUTH_URL` at the exact HTTPS app origin. Example variable names are in `.env.example`; never commit real values or use `NEXT_PUBLIC_` for these secrets.

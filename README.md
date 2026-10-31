@@ -4,7 +4,7 @@ A self-paced Medical Laboratory Science reviewer for MTAP, mockboards, and board
 
 This is a test project with a deliberately small, source-checked starter question bank. It is not a complete exam syllabus or a prediction of passing an examination.
 
-## 31 October update
+## Latest updates
 
 Version 0.3.0 adds clearer progress definitions, content checks, compact mobile practice, question-level recaps, and improved recovery states. See the [update notes](docs/USABILITY-UPDATE.md) and run `npm run content:check` to inspect bank structure. Release publication and hosted verification are tracked in [the work checkpoint](docs/WORK-STATE.md).
 
@@ -12,11 +12,11 @@ Version 0.2.1 improves laptop and phone readability with a shared relative type 
 
 The 0.2 update adds faster answer and next-question interactions, 20 previewable color palettes and custom gradients, optional study timers, password visibility, and account recovery with saved one-time codes. The bank now contains 56 original questions. See the [update notes](docs/UPDATES-2026-10-31.md) for behavior, migration details, and verification status.
 
-Version 0.2 is live on the canonical production address. The production build passed, the hosted additive migrations were applied, and the live API recovery smoke test preserved the same account and its study records. See the [verification record](docs/VERIFICATION.md) for the exact test counts and remaining device/monitoring limits.
+For the previous 0.2 release, the production build passed, hosted additive migrations were applied, and the live API recovery smoke test preserved the same account and its study records. See the [verification record](docs/VERIFICATION.md) for those test counts and remaining device/monitoring limits.
 
 ## Hosted project
 
-LabSprint 0.2.1 is live at [labsprint.vercel.app](https://labsprint.vercel.app). Production deployment `dpl_FuymBRnh5M893wfTFFzZSHMdw4VK` is READY. Hosted API checks for version 0.2 passed for registration, atomic answer/checkpoint saving, bookmarking, appearance saving, and recovery-code password reset with history preserved. Local browser checks covered personalization, timer, password visibility, immediate practice feedback, and the typography update. See the [verification record](docs/VERIFICATION.md).
+LabSprint 0.3.0 is live at [labsprint.vercel.app](https://labsprint.vercel.app). Production deployment `dpl_2gbLei2niAr3c8SLrhk2Jn9n4FtV` is READY, built from commit `0048738c6268932f2b7518710e0f44368582306a`. Hosted checks passed for registration, wrong-answer saving, question-version metadata, bookmarks, restored sessions, and correct retries preserving baseline accuracy and unique coverage. The live UI displays version 0.3.0. See the [release checkpoint](docs/WORK-STATE.md) and [update notes](docs/USABILITY-UPDATE.md).
 
 Vercel project `labsprint` is configured in `joreenns-projects`, with a production-only Neon Free database named `labsprint-db` in Singapore (`sin1`). Hosted migrations include the additive appearance and recovery-code changes, and authentication/database secrets are configured in Vercel. Production has public access as approved by the owner; previews remain protected. Source is versioned in [joreenn/LabSprint](https://github.com/joreenn/LabSprint). Vercel deployments currently use source uploads; automatic Git deployments are not configured. See [deployment details](docs/DEPLOYMENT.md).
 

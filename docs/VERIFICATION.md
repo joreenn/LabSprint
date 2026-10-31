@@ -1,5 +1,13 @@
 # LabSprint verification records
 
+## Version 0.3.0 — 1 November 2026
+
+Production deployment `dpl_2gbLei2niAr3c8SLrhk2Jn9n4FtV` is READY at [labsprint.vercel.app](https://labsprint.vercel.app), with source commit `0048738c6268932f2b7518710e0f44368582306a` recorded in Vercel metadata. The live Settings screen displays version 0.3.0.
+
+All 32 tests passed locally, as did the production build including TypeScript, formatting, and content validation. Responsive browser checks covered 320px, 390px, 768px, and 1366px widths. Hosted checks with a fresh synthetic account passed registration, saved-answer/version metadata, bookmarking, restored checkpoints, session completion, and retry behavior. A wrong answer followed by a correct retry retained 0/1 baseline and one unique question explored; repeat accuracy was 1/1, correction count was one, and the active missed queue was empty. The synthetic account was removed by exact ID/email/name afterward. No existing learner account was reset or used for mutations.
+
+The deployment-specific request scan returned zero 5xx records in the checked 15-minute window; this is not ongoing monitoring. The live browser warning/error log was empty. Email recovery remained disabled and actual email delivery was not tested. No schema migration or external auth/mail configuration change was made. See [USABILITY-UPDATE.md](USABILITY-UPDATE.md) and [WORK-STATE.md](WORK-STATE.md).
+
 ## Version 0.2 — 31 October 2026
 
 Production [labsprint.vercel.app](https://labsprint.vercel.app) is READY on deployment `dpl_2ZuThDztLHFM4eQQ94ChQNJc9rZ9`. Vercel's build completed in 39 seconds from an allowlist of 61 source/configuration files. Hosted migrations 2 (appearance) and 3 (recovery-code hashes) were applied additively. Existing learner accounts and history were not replaced.

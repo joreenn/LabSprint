@@ -17,6 +17,7 @@ This release preserves the lavender design, navigation, question content, IDs, v
 - Explicit question review showed no size/style controls. A whole subject with eight questions offered only 5 and All (8). A filter with zero eligible questions disabled Start and explained how to recover.
 - Responsive checks covered 320px and 390px phone, 768px tablet, and 1366px desktop layouts. New progress/topic content had no horizontal overflow. At 320px the chart scrolls locally, and main content retains 112px bottom padding for sticky navigation. Existing safe-area navigation padding remains.
 - Final results: all 32 tests passed, production build including TypeScript passed, formatting passed, and content validation passed. Browser warning/error log was empty. `WORK-STATE.md` records the completed checkpoint.
+- Published on 1 November 2026. The hosted synthetic-account checks verified the same baseline/coverage/correction rules against the production database, then removed only that test account. The production deployment is READY, the browser displays version 0.3.0, and the deployment-specific request scan found no 5xx records during the checked 15-minute window. Email recovery remains unconfigured and delivery was not tested.
 
 ## Remaining work
 

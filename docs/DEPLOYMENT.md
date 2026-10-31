@@ -2,21 +2,21 @@
 
 ## Current setup
 
-| Item                    | Configuration                                                                 |
-| ----------------------- | ----------------------------------------------------------------------------- |
-| Production URL          | [labsprint.vercel.app](https://labsprint.vercel.app)                          |
-| Automatic project alias | `labsprint-joreenns-projects.vercel.app` — not configured for learner sign-in |
-| Vercel project/team     | `labsprint` in `joreenns-projects`                                            |
-| Framework/runtime       | Next.js, Node.js 24                                                           |
-| Production database     | Neon Free, `labsprint-db`, Singapore (`sin1`)                                 |
-| Database scope          | Production only                                                               |
-| Authentication          | Better Auth email/password, secrets configured in Vercel                      |
-| Canonical auth origin   | `https://labsprint.vercel.app`                                                |
-| Current release         | LabSprint 0.2, 31 October 2026                                                |
-| Current deployment      | `dpl_2ZuThDztLHFM4eQQ94ChQNJc9rZ9` — READY                                    |
-| Build duration          | 39 seconds                                                                    |
-| Source integration      | Direct source upload; no connected Git repository or Git commit               |
-| Access                  | Public production approved by the owner; protected previews                   |
+| Item                    | Configuration                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------- |
+| Production URL          | [labsprint.vercel.app](https://labsprint.vercel.app)                                     |
+| Automatic project alias | `labsprint-joreenns-projects.vercel.app` — not configured for learner sign-in            |
+| Vercel project/team     | `labsprint` in `joreenns-projects`                                                       |
+| Framework/runtime       | Next.js, Node.js 24                                                                      |
+| Production database     | Neon Free, `labsprint-db`, Singapore (`sin1`)                                            |
+| Database scope          | Production only                                                                          |
+| Authentication          | Better Auth email/password, secrets configured in Vercel                                 |
+| Canonical auth origin   | `https://labsprint.vercel.app`                                                           |
+| Current release         | LabSprint 0.3.0, 1 November 2026                                                         |
+| Current deployment      | `dpl_2gbLei2niAr3c8SLrhk2Jn9n4FtV` — READY                                               |
+| Source commit           | `0048738c6268932f2b7518710e0f44368582306a`                                               |
+| Source integration      | Direct source upload from versioned source; automatic Git deployments are not configured |
+| Access                  | Public production approved by the owner; protected previews                              |
 
 Vercel has confirmed the 0.2 deployment is READY. Hosted HTTP checks passed for registration, atomic answer/checkpoint scoring, bookmarks, appearance, and one-time recovery-code password reset. Recovery preserved the same user ID, attempt, bookmark, active practice, and theme; revoked the old session; allowed the new password; left nine unused codes; and rejected reuse of the consumed code. Live browser sign-in after recovery also passed. The production request scan found zero HTTP 500-or-higher responses in the preceding 15 minutes. Synthetic update-test accounts were removed; no real learner account was reset or targeted for cleanup. Local browser checks covered theme previews, timer movement, password visibility, and immediate practice feedback. See [VERIFICATION.md](VERIFICATION.md) for the exact boundaries and monitoring limits.
 
