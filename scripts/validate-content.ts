@@ -1,5 +1,6 @@
 import { questions, subjects } from '../src/content/questions';
 import { topicCoverage, validateQuestionBank } from '../src/content/validation';
+import { expansionCoverage } from '../src/content/coverage';
 
 const errors = validateQuestionBank(questions, subjects);
 if (errors.length) {
@@ -11,7 +12,8 @@ if (errors.length) {
     `Validated ${questions.length} questions across ${subjects.length} subjects and ${topics.length} listed topics.`,
   );
   console.log(
-    `${topics.filter((t) => t.count === 0).length} topics have no questions; ${topics.filter((t) => t.count === 1).length} have one question.`,
+    `${topics.filter((t) => t.count === 0).length} ${topics.filter((t) => t.count === 0).length === 1 ? 'topic has' : 'topics have'} no questions; ${topics.filter((t) => t.count === 1).length} have one question.`,
   );
   console.log('Structural checks do not establish academic accuracy or full syllabus coverage.');
+  console.table(expansionCoverage(questions, subjects));
 }

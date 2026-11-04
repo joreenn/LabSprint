@@ -6,6 +6,8 @@ This is a test project with a deliberately small, source-checked starter questio
 
 ## Latest updates
 
+Version 0.4.0 expands the local bank to 366 original questions, including 80 from Rodak and 84 from Strasinger, and mixes eligible reference sources in practice sessions. Source and verification details are in [the expansion record](docs/CONTENT-EXPANSION-2026-11-01.md); [the active checkpoint](docs/RESUME-V040.md) tracks publication status. This first batch does not complete the longer-term 2,000-per-subject goal.
+
 Version 0.3.0 adds clearer progress definitions, content checks, compact mobile practice, question-level recaps, and improved recovery states. See the [update notes](docs/USABILITY-UPDATE.md) and run `npm run content:check` to inspect bank structure. Release publication and hosted verification are tracked in [the work checkpoint](docs/WORK-STATE.md).
 
 Version 0.2.1 improves laptop and phone readability with a shared relative type scale, larger practice text, responsive cards, and larger touch controls. See the [typography update](docs/TYPOGRAPHY-2026-10-31.md) and [current release checkpoint](docs/WORK-STATE.md).
@@ -100,4 +102,4 @@ Book PDFs, extracted book text, passwords, and environment secrets must not be c
 
 Internet access is required to load the hosted reviewer and sync results. Full offline practice is a future enhancement. There is no timed exam mode, public leaderboard, or verified prediction of exam readiness. The floating study timer is optional and never imposes a question deadline. Email verification and email recovery delivery are not configured; use the saved one-time recovery-code flow instead. The deployment link allows anyone who receives it to register, so sharing the link is not an access-control mechanism.
 
-The bank remains limited and requires independent MLS expert review. Standalone Strasinger and Rodak reference files have not been supplied; their suggested coverage remains pending source access and verification. Supplied Hubbard, Elsevier, Linne & Ringsrud, and Lehman/SUCCESS! material supports the added questions alongside the existing Harr, Ciulla/SUCCESS!, Apollon, and Alba sources. No source PDFs are deployed.
+The bank remains limited and requires independent MLS expert review. The v0.4.0 draft integrates the supplied standalone Rodak seventh edition and Strasinger seventh edition; see the source-audit records for checked pages and limitations. Supplied Hubbard, Elsevier, Linne & Ringsrud, and Lehman/SUCCESS! material supports the added questions alongside the existing Harr, Ciulla/SUCCESS!, Apollon, and Alba sources. No source PDFs are deployed.

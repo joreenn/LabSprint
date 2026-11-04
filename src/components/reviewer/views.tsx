@@ -781,13 +781,14 @@ export function Preferences({
             <h3>A bank built to improve</h3>
             <p>
               {questions.length} original questions, with explanations for every choice. Primary
-              references include Harr, SUCCESS!, and Apollon where text can be verified.
+              references include Harr, SUCCESS!, Rodak, Strasinger, and Apollon where text can be
+              verified.
             </p>
             <p>
               Spot something unclear? Flag it from the answer explanation. Question IDs and versions
               make corrections traceable.
             </p>
-            <span className="pill">LabSprint v0.3.0 · Starter bank</span>
+            <span className="pill">LabSprint v0.4.0 · Expanding practice bank</span>
           </section>
           <button className="button secondary" onClick={onSignOut}>
             <LogOut size={17} />

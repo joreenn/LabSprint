@@ -99,4 +99,4 @@ The database records the question version on each attempt. Before changing a cor
 
 ## Deferred work
 
-Expand topic coverage and expert review; supplied-file access for standalone Strasinger and Rodak; full offline support; email verification and optional recovery email delivery; account deletion/export; content administration; provider backup procedures; and broader physical-device testing. Timed exams and public competition remain outside the agreed scope. Saved recovery-code resets and interrupted-save retries are included in 0.2 and should not be described as a complete offline or email-recovery service.
+Expand topic coverage and expert review; independent MLS review of the now-integrated standalone Strasinger and Rodak batches; full offline support; email verification and optional recovery email delivery; account deletion/export; content administration; provider backup procedures; and broader physical-device testing. Timed exams and public competition remain outside the agreed scope. Saved recovery-code resets and interrupted-save retries are included in 0.2 and should not be described as a complete offline or email-recovery service.

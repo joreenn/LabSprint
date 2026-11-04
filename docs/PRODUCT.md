@@ -100,3 +100,7 @@ The agreed initial direction was Next.js/TypeScript, PostgreSQL, Better Auth, an
 The project name is **LabSprint**. The name is branding; sessions remain untimed and self-paced.
 
 The 0.2 data changes are additive: migration 2 stores appearance preferences, and migration 3 stores recovery-code hashes. Preserve existing users, history, question IDs, and the shared PostgreSQL schema. Atomic server-scored answer/checkpoint writes replace the older answer-write plus separate session-write flow; the client can render feedback and navigate locally while reliable saves continue.
+
+## 4 November continuation
+
+The saved v0.4.0 first expansion batch integrates the supplied Rodak seventh edition and Strasinger seventh edition plus existing Harr source material: 310 new original items, 366 available in total. The original 56 items, identifiers and versions are preserved. References are mixed within the eligible selection without relaxing subject/topic/style filters. The larger 2,000-per-subject target is still unfinished; source checking is not independent professional sign-off. See CONTENT-EXPANSION-2026-11-01.md and RESUME-V040.md for current inventory and release status. Older source-availability statements above describe their historical releases.

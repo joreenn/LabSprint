@@ -1,15 +1,19 @@
 # Starter-bank coverage and expansion backlog
 
+**Updated inventory:** [1 November batch 1](CONTENT-EXPANSION-2026-11-01.md) adds 310 source-checked original items for **366 total** and integrates the supplied Rodak and Strasinger books. Other body fluids is no longer empty. The tables below remain the historical 56-item starting snapshot; use `npm run content:check` for the live counts and remaining 2,000-per-subject targets.
+
 This inventory describes the available practice bank, not full MTAP, mockboard, or board-exam syllabus coverage. It does not establish exam readiness. Counts below were measured from `questions` and `subjects` on 31 October 2026: **56 questions, 7 subject groups, 42 listed topics; 2 topics have no questions and 27 have one question.** The app calculates its live counts from the bank; this document is an editorial snapshot.
 
-## Prioritized editorial work
+## Historical starter priorities (updated status below)
 
 1. **Fill the two empty listed topics:** Other body fluids; Philippine Medtech Laws. Supply authorized reference material and obtain qualified review before drafting or publishing. Medtech law content needs current primary-source verification as well as reviewer approval. Empty topics remain visible as zero available questions.
 2. **Broaden the 27 one-question topics** listed below. A single item provides a very narrow practice sample. Add distinct learning objectives and meaningful recall/case variety rather than superficial rewrites. No particular item count is a validated mastery standard.
 3. **Add depth to the 2–3-question topics** after reviewing a subject blueprint against the intended exam syllabus. The catalog's existing topic names are not evidence that all required topics are present.
-4. **Review the subject blueprint itself:** map authoritative syllabi and authorized references, identify omitted topics, and record reviewer sign-off. Strasinger and Rodak remain requested references awaiting supplied, verified material; do not invent citations or claim those books have been integrated.
+4. **Review the subject blueprint itself:** map authoritative syllabi and authorized references, identify omitted topics, and record reviewer sign-off. The original checkpoint awaited Strasinger and Rodak. Both are now integrated in the first expansion batch with source audits; comprehensive blueprint mapping and qualified review remain pending.
 
-## Measured topic inventory
+Current next priorities are the still-empty Philippine Medtech Laws topic (verified current primary sources needed), the four remaining one-question topics, and thin histopathology/virology coverage. See the current batch inventory rather than interpreting the historical counts below as live totals.
+
+## Historical measured topic inventory
 
 | Subject                                              | Topic                        | Available questions |
 | ---------------------------------------------------- | ---------------------------- | ------------------: |

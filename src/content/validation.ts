@@ -4,6 +4,7 @@ import type { Question, Subject } from './types';
 export function validateQuestionBank(bank: readonly Question[], catalog: readonly Subject[]) {
   const errors: string[] = [];
   const ids = new Set<string>();
+  const stems = new Map<string, string>();
   for (const q of bank) {
     const label = q.id || '(missing question ID)';
     if (!q.id?.trim()) errors.push(`${label}: question ID is required`);
@@ -14,10 +15,21 @@ export function validateQuestionBank(bank: readonly Question[], catalog: readonl
     else if (!subject.topics.includes(q.topic)) errors.push(`${label}: unknown topic`);
     if (!q.stem?.trim() || !q.takeaway?.trim())
       errors.push(`${label}: stem and takeaway are required`);
+    const normalizedStem = q.stem
+      ?.toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .trim();
+    if (normalizedStem) {
+      if (stems.has(normalizedStem))
+        errors.push(`${label}: duplicate stem with ${stems.get(normalizedStem)}`);
+      else stems.set(normalizedStem, label);
+    }
     if (!Array.isArray(q.options) || q.options.length !== 4) {
       errors.push(`${label}: exactly four choices are required`);
     }
     const options = Array.isArray(q.options) ? q.options : [];
+    if (new Set(options.map((o) => o.text?.trim().toLowerCase())).size !== options.length)
+      errors.push(`${label}: duplicate choice text`);
     if (new Set(options.map((o) => o.id)).size !== options.length)
       errors.push(`${label}: duplicate option ID`);
     if (!q.correctOptionId || options.filter((o) => o.id === q.correctOptionId).length !== 1)

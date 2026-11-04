@@ -1,5 +1,9 @@
 import type { Question, Subject } from './types';
 import { extraQuestions } from './extra-questions';
+import { rodakQuestions } from './rodak-questions';
+import { strasingerQuestions } from './strasinger-questions';
+import { harrExpansionQuestions } from './harr-expansion-questions';
+import { harrLaboratoryQuestions } from './harr-laboratory-questions';
 
 export const subjects: Subject[] = [
   {
@@ -1322,4 +1326,8 @@ export const questions: Question[] = [
     'Apollon Reviewer',
     'Edition not stated in supplied scan',
   ),
+  ...rodakQuestions,
+  ...strasingerQuestions,
+  ...harrExpansionQuestions,
+  ...harrLaboratoryQuestions,
 ];

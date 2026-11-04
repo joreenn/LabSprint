@@ -28,6 +28,7 @@ import {
 } from '@/lib/practice-review';
 import type { PracticeSession, Workspace } from './types';
 import { fmt } from './shared';
+import { referenceMixedSample } from '@/lib/reference-sampling';
 import { Modal } from './dialogs';
 export function PracticeSetup({
   config,
@@ -96,6 +97,7 @@ export function PracticeSetup({
         {size.count} {size.count === 1 ? 'question' : 'questions'} in this session
         {!single ? ` · ${pool.length} eligible` : ''}. Options are shuffled each time.
         {pool.length > 100 ? ' Sessions support up to 100 questions.' : ''}
+        {!single ? ' Available reference books are mixed within your selection.' : ''}
       </p>
       {active ? (
         <div className="inline-warning">
@@ -111,13 +113,7 @@ export function PracticeSetup({
       <button
         className="button primary wide"
         disabled={busy || pool.length === 0}
-        onClick={() =>
-          onStart(
-            shuffled(pool)
-              .slice(0, size.count)
-              .map((q) => q.id),
-          )
-        }
+        onClick={() => onStart(referenceMixedSample(pool, size.count).map((q) => q.id))}
       >
         {busy ? <Loader2 size={17} className="spin" /> : <Play size={17} />}
         {single ? 'Review 1 question' : 'Start practice'} <ArrowRight size={17} />

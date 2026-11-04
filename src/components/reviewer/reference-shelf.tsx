@@ -1,5 +1,6 @@
 import { BookOpen, ChevronDown } from 'lucide-react';
 import { questions, subjects } from '@/content/questions';
+import { expansionCoverage } from '@/content/coverage';
 
 export function ReferenceShelf() {
   const sources = [
@@ -38,17 +39,30 @@ export function ReferenceShelf() {
             <h3>{source.title}</h3>
             <p>{source.edition}</p>
             <span>
-              {source.count} questions · {source.subjects.join(', ')}
+              {source.count} {source.count === 1 ? 'question' : 'questions'} ·{' '}
+              {source.subjects.join(', ')}
             </span>
           </article>
         ))}
       </div>
       <div className="reference-requested">
-        <strong>Requested for the next reference review</strong>
+        <strong>Growing toward 2,000 questions per subject</strong>
         <p>
-          Strasinger’s urinalysis/body fluids text and Rodak’s hematology text are awaiting supplied
-          reference files. They are not yet used for question citations.
+          This is an expansion target, not the current bank size or full syllabus coverage. New
+          questions are source-checked original practice items; independent academic review is still
+          needed. No book PDFs or publisher question banks are included.
         </p>
+        <ul>
+          {expansionCoverage(questions, subjects).map((row) => (
+            <li key={row.subjectId}>
+              {row.subject}: {row.available.toLocaleString()} / {row.target.toLocaleString()}{' '}
+              available
+              {' · '}
+              {row.sources} references{' · '}
+              {row.remaining.toLocaleString()} remaining
+            </li>
+          ))}
+        </ul>
       </div>
     </details>
   );

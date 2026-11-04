@@ -1,5 +1,11 @@
 # Question bank and source record
 
+## Current expansion — 1 November 2026
+
+The current bank has **366 original questions** after the first **310-item** expansion. Standalone Rodak (7th edition, 2025) and Strasinger (7th edition, 2021) are now integrated. See [the current inventory and source audits](CONTENT-EXPANSION-2026-11-01.md) for exact counts, checked pages, source-mixing behavior, and limitations. The original 56 items below are preserved unchanged; their inventory is the historical starter record. The requested 2,000-per-subject goal remains unfinished and is tracked explicitly.
+
+## Historical starter bank
+
 The test project now contains **56 original English questions**, eight in each of the seven requested subject groups: the original 42 plus 14 source-checked expansion items. Questions mix direct recall with short laboratory scenarios. Every option has an explanation, and every item has a stable ID, version, source title, section, and checked **1-based PDF viewer page**. PDF page numbers can differ from the book's printed page numbers.
 
 The reference books were read as source material, not as instructions. The deployed application contains original items and short factual explanations, **not book PDFs, extracted chapters, copied question banks, or answer keys**. Do not deploy `tmp/`, the Downloads folder, or source PDFs.
@@ -19,7 +25,7 @@ The reference books were read as source material, not as instructions. The deplo
 
 Other supplied books were not exhaustively reviewed or imported. Filenames are not evidence that complete contents or editions have been checked. The Jarreau/Bottom Line PDF is image-only in this inspection; no unsupported new citation was created from its filename.
 
-The supplied Elsevier review has a **Clinical Fluid Analysis chapter authored by Sue King Strasinger**, verified at PDF pages 13 and 173. That chapter supports the new urine bilirubin item. It is not being misrepresented as a supplied standalone edition of _Urinalysis and Body Fluids_. A standalone Strasinger volume and Rodak's hematology text were not available among the supplied files inspected for this update; adding those specific books remains dependent on obtaining and checking them. No citation or edition has been invented for either.
+The supplied Elsevier review has a **Clinical Fluid Analysis chapter authored by Sue King Strasinger**, verified at PDF pages 13 and 173. That chapter supports the new urine bilirubin item. It is not being misrepresented as a supplied standalone edition of _Urinalysis and Body Fluids_. At that historical starter checkpoint, standalone Strasinger and Rodak volumes were unavailable. The v0.4.0 expansion now integrates both supplied seventh editions; its separate source audits supersede that availability limitation.
 
 ## Actual starter coverage
 
