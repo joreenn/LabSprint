@@ -37,4 +37,4 @@ Every new item is originally written, has four option-specific explanations, one
 
 ## Verification record
 
-Final automated, build, browser and deployment results are recorded in WORK-STATE.md after release verification. No database migration or authentication-setting change is required for this batch.
+Resumed and published on 4 November 2026. All 37 tests, content validation, formatting, and the production build passed. Local write-flow and phone/desktop checks passed. Hosted verification was read-only and confirmed 366 items, both new books, and version 0.4.0. A proposed production write test was blocked by automatic approval review and did not run. Exact release and continuation evidence is saved in [WORK-STATE.md](WORK-STATE.md) and [RESUME-V040.md](RESUME-V040.md). No database migration or authentication-setting change was required for this batch.

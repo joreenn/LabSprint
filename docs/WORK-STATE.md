@@ -4,20 +4,21 @@
 
 If credits or tool approvals become unavailable, stop at the current checkpoint and wait for the user to return. Resume from saved work; do not restart completed implementation, migrations, or deployments unnecessarily. Do not bypass an unavailable approval check.
 
-## Active checkpoint: v0.4.0 expansion (4 November 2026)
+## Latest checkpoint: v0.4.0 published (4 November 2026)
 
-Confirmed stopping point: drafting and local integration of 366 questions were saved (56 existing + 310 additions). Final verification and publication for this batch were not recorded. Current production remains v0.3.0. The exact instant credits ended cannot be recovered from these files.
+**Status: first expansion batch complete and live.** Source commit `0ce5486e79985de7e80e63e8fea48451e1ac69ea` is on main. Production deployment `dpl_78C6EmXfejwxfCqnnG1ya7n9q8yJ` is READY at https://labsprint.vercel.app, with matching commit metadata and no alias error.
 
-Current task: audit this existing first batch, preserve the original 56 items and learner history, verify tests/build/browser behavior, then commit/push and deploy the validated batch. The 2,000-per-subject long-term target remains unfinished. No schema/auth-setting change or source PDF upload is planned.
+The interruption left drafting/imports saved but final verification/publication unrecorded. The exact credit-stop instant was unknown. Work resumed from those files; the completed v0.3.0 records below were not used as proof for v0.4.0.
 
-Resume from the existing files, not from scratch. Source audits: Rodak 80; Strasinger 84; Harr chemistry/immunology 80; Harr laboratory/microbiology/parasitology 66. Final check results are pending. If interrupted, continue from the next incomplete step below; do not treat an interrupted check as passed.
+- [x] Rechecked all 310 additions: 80 Rodak and 84 Strasinger against supplied PDFs, and 146 Harr against retained page-marked text. Corrected the `para-h5-011` citation from PDF page 703 to 701 (supporting range 701-702). No independent professional approval is claimed.
+- [x] All 56 original items are preserved. Permanent integrity fixtures protect their IDs, content, keys, versions, and references.
+- [x] Content validation passed: 366 items, seven subjects, 42 topics, one empty topic, and four one-question topics. All 37 tests, the production build including TypeScript, and formatting passed.
+- [x] Isolated local browser/API checks passed for eligible source mixing, bookmark/answer persistence, refresh/resume, single-question review and replacement warning, both new book rationales, recap, and the larger coverage denominator. Checked 320px/390px phone widths and 1366px desktop width with no horizontal overflow or browser errors.
+- [x] Source pushed and Vercel release published. Read-only live checks confirmed 366 question rows, ten source editions, Rodak 80/Strasinger 84, and version 0.4.0. The browser warning/error log was empty.
+- [x] The hosted write-test script was rejected by automatic approval review under the earlier no-production-data-change constraint. It did not execute and no synthetic production account was created. Verification used local write-flow tests and read-only hosted checks. The unused temporary production environment file was removed; do not retry the rejected script without new explicit authorization.
+- [x] Local preview stopped and viewport overrides reset. Screenshot: `docs/screenshots/v040-live-references.jpg`. No source PDFs, extracts, credentials, database schemas, or external auth settings were changed or published.
 
-- [x] Inspect local source, instructions, imports and draft counts.
-- [x] Source audit: all 310 additions rechecked; corrected para-h5-011 citation page 703 to 701 (supporting range 701–702). Rodak/Strasinger used supplied PDFs; Harr used retained page-marked text. Independent MLS expert review is still pending.
-- [x] Original-56 integrity comparison: both retained baseline modules match committed HEAD; all 56 definitions are unchanged.
-- [x] Final verification: 37 tests passed, zero failed; production build including TypeScript passed; full formatting passed. Added permanent integrity fixture for the original 56 questions. No source PDFs, credentials, schemas or auth settings changed.
-- [x] Local browser checks: ten editions; Rodak80/Strasinger84; five unique hematology questions from three editions; bookmark/answer survived refresh; coverage uses366; single-question review and both new book rationales/recaps worked; 320/390px reference shelf had no horizontal overflow; desktop1366px checked; browser warning/error log empty.
-- [ ] Current docs, commit/push, deployment, hosted verification and synthetic cleanup.
+No required work remains for this first batch. The 2,000-per-subject goal remains unfinished (13,634 additional items by count), Philippine Medtech Laws still requires verified current sources, and independent MLS review is pending. See [RESUME-V040.md](RESUME-V040.md) for restart instructions and exact release evidence.
 
 ## Version 0.3.0 published and verified
 
@@ -57,4 +58,4 @@ The owner authorized publication on 1 November 2026. All five priorities are com
 
 ## Remaining product limitations
 
-The live v0.3.0 bank has 56 questions. The v0.4.0 draft integrates supplied standalone Strasinger and Rodak references and contains 366 questions; it remains limited and pending the active release checklist above. Recovery uses codes saved before the password is forgotten; reset email is disabled. Full offline use and physical-device testing remain outside this release.
+The live v0.4.0 bank contains 366 original questions, including supplied standalone Strasinger/Rodak references. It remains limited and requires independent MLS review and further content expansion. Recovery uses codes saved before the password is forgotten; reset email is disabled. Full offline use and physical-device testing remain outside this release.

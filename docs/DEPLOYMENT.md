@@ -12,13 +12,13 @@
 | Database scope          | Production only                                                                          |
 | Authentication          | Better Auth email/password, secrets configured in Vercel                                 |
 | Canonical auth origin   | `https://labsprint.vercel.app`                                                           |
-| Current release         | LabSprint 0.3.0, 1 November 2026                                                         |
-| Current deployment      | `dpl_2gbLei2niAr3c8SLrhk2Jn9n4FtV` — READY                                               |
-| Source commit           | `0048738c6268932f2b7518710e0f44368582306a`                                               |
+| Current release         | LabSprint 0.4.0, 4 November 2026                                                         |
+| Current deployment      | `dpl_78C6EmXfejwxfCqnnG1ya7n9q8yJ` — READY                                               |
+| Source commit           | `0ce5486e79985de7e80e63e8fea48451e1ac69ea`                                               |
 | Source integration      | Direct source upload from versioned source; automatic Git deployments are not configured |
 | Access                  | Public production approved by the owner; protected previews                              |
 
-Vercel has confirmed the 0.2 deployment is READY. Hosted HTTP checks passed for registration, atomic answer/checkpoint scoring, bookmarks, appearance, and one-time recovery-code password reset. Recovery preserved the same user ID, attempt, bookmark, active practice, and theme; revoked the old session; allowed the new password; left nine unused codes; and rejected reuse of the consumed code. Live browser sign-in after recovery also passed. The production request scan found zero HTTP 500-or-higher responses in the preceding 15 minutes. Synthetic update-test accounts were removed; no real learner account was reset or targeted for cleanup. Local browser checks covered theme previews, timer movement, password visibility, and immediate practice feedback. See [VERIFICATION.md](VERIFICATION.md) for the exact boundaries and monitoring limits.
+Vercel confirmed the current deployment is READY with the canonical alias and matching source commit. Hosted read-only browser checks confirmed 366 items, both new reference books, and version 0.4.0. All 37 local tests and the production build passed; local browser/API checks covered source selection, persistence, refresh/resume, and new question explanations. Automatic approval review blocked a proposed production test-account write, so that test did not run. No existing learner account was used for mutations. See [VERIFICATION.md](VERIFICATION.md) for exact check boundaries and historical recovery evidence.
 
 Hosted migrations 2 (appearance) and 3 (recovery-code hashes) were applied additively using Vercel's production environment runner. Existing accounts and history were not replaced. The initial 30 October deployment was `dpl_8sZynD9k3P1HEpwnnN4hMCiMPVpv`; it is retained as historical release information rather than the current version.
 
@@ -28,7 +28,7 @@ Use only [labsprint.vercel.app](https://labsprint.vercel.app) for learners. Auth
 
 ## Files and secrets
 
-The 0.2 upload used an explicit allowlist of 61 source/configuration files. No book PDFs, extracted text, `.data/`, or `.env` files were uploaded. `.vercelignore` also excludes private/generated files for future CLI deployments. Review this file whenever adding data or tooling to the project.
+The 0.4.0 upload used an explicit allowlist of 71 source/configuration files. No book PDFs, extracted text, `.data/`, or `.env` files were uploaded. `.vercelignore` also excludes private/generated files for future CLI deployments. Review this file whenever adding data or tooling to the project.
 
 Vercel holds these production variables; their values must remain private:
 
@@ -85,6 +85,6 @@ These are acceptance steps, not claims that every hosted check has already passe
 
 ## Operational limits
 
-The test edition contains 56 original starter questions and is not comprehensive or independently expert-validated exam coverage. Standalone Strasinger and Rodak source files remain pending. Philippine Medtech Laws questions require verified current Philippine primary sources. Password recovery uses saved one-time codes; the owner chose this approach instead of configuring an email-sending domain. Optional email plumbing remains disabled without provider credentials and a verified sender. Full offline practice, account deletion, backups policy, and content administration remain future work. Use provider backup options as progress becomes important.
+The test edition contains 366 original questions, including additions checked against the supplied standalone Strasinger and Rodak PDFs. It is not comprehensive or independently expert-validated exam coverage. See the source-audit records for checked pages and limitations. Philippine Medtech Laws questions require verified current Philippine primary sources. Password recovery uses saved one-time codes; the owner chose this approach instead of configuring an email-sending domain. Optional email plumbing remains disabled without provider credentials and a verified sender. Full offline practice, account deletion, backups policy, and content administration remain future work. Use provider backup options as progress becomes important.
 
 Anyone who receives the public production link may register. Each account's stored progress remains private to that account. Sharing the URL is not an invitation-code access control mechanism.

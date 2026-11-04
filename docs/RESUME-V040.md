@@ -1,31 +1,31 @@
-# v0.4.0 continuation notes
+# v0.4.0 continuation checkpoint
 
-Updated 4 November 2026 (Asia/Manila). The detailed active checklist is at the top of WORK-STATE.md. Read that file and git status before resuming. Existing v0.4.0 source imports 366 items; final audit, test/build/browser verification, commit/push and deployment are pending. Production remains v0.3.0 until a new READY deployment is confirmed.
+Updated: 4 November 2026 (Asia/Manila). **The first expansion batch is complete and published.** Read [WORK-STATE.md](WORK-STATE.md) before beginning future changes.
 
-Do not recreate the source modules or repeat completed migrations. Preserve original IDs, versions, history, bookmarks and saved sessions. Source PDFs and extracted pages stay local under Downloads/ignored tmp and are never committed or deployed. This first batch does not complete the long-term 2,000-per-subject target.
+## Confirmed interruption boundary
 
-## Evidence log
+Draft question modules and their local imports were saved, reaching 366 items. Final verification and publication were not recorded. The exact instant credits ran out could not be determined. The old checkpoint described completed v0.3.0, so it was not treated as evidence for this batch. Resumed work reused the saved modules rather than recreating them.
 
-- Read repository instructions and installed Next component guidance.
-- Draft bank: 56 existing + 80 Rodak + 84 Strasinger + 80 Harr chemistry/immunology + 66 Harr laboratory/microbiology/parasitology.
-- PDF/source-fidelity audits in progress. Original Harr PDF is unavailable; retained page-marked text is the source evidence for its additions.
-- apply_patch file writes failed in this session; direct scoped Python writes succeed. No security settings changed or approval bypassed.
-- Next: original-item integrity comparison, content validation, regression suite and source audit corrections.
+## Completed work and evidence
 
-- Content validation passed: 366 items, seven subjects, 42 topics; one empty topic and four one-question topics.
-- Existing baseline check passed for all 56 original items (IDs, keys, rationales, versions and references unchanged).
-- Full regression suite running in exec session 67201; do not mark passed until exit is observed.
+- Content: 310 additions (80 Rodak, 84 Strasinger, 146 Harr) plus 56 preserved original items = 366. Source-audit records describe the cited-page checks and their limitations. The only concrete citation correction was `para-h5-011`: PDF page 703 became 701, with the supporting range 701-702 retained.
+- Integrity: retained baseline modules match committed v0.3.0; all 56 original question definitions compare equal. A permanent semantic-content integrity test uses `tests/fixtures/starter-v030-hashes.json`.
+- Automated checks: content validation passed; all 37 tests passed; the production build including TypeScript passed; formatting passed. Completed execution sessions 66086 (build) and 5910 (tests) exited successfully. Repeat these checks when later changes justify them.
+- Local browser/API checks: used the separate ignored `tmp/v040-preview-data` database. Confirmed ten source editions, five unique hematology items selected from three editions, persisted answers/bookmarks after refresh, the 366-item coverage denominator, single-question review and replacement warning, both new book rationales, and question-level recap. Checked 320px and 390px phone widths and 1366px desktop width without horizontal overflow; the browser warning/error log was empty. The preview server was stopped.
+- Source commit: `0ce5486e79985de7e80e63e8fea48451e1ac69ea`. Production deployment: `dpl_78C6EmXfejwxfCqnnG1ya7n9q8yJ`. Vercel project: `prj_smcsMOv8LDn1iwXoDWIernTRHI2q`; team: `team_igVPwMjhaxLWAedNRpmyw3y3`. Confirmed READY at https://labsprint.vercel.app with matching source metadata.
+- Hosted read-only checks: confirmed 366 question rows, 80 Rodak questions, 84 Strasinger questions, and version 0.4.0. Screenshot: `docs/screenshots/v040-live-references.jpg`. Viewport overrides were reset.
+- Production write-test boundary: automatic approval review rejected `tmp/smoke-v040.ts` because production-account writes conflicted with the earlier no-production-data-change constraint. The script never executed, `tmp/v040-hosted-user.json` was not created, and no synthetic production account was created. Do not bypass or retry that rejection. Existing users were not used for mutations. The unused temporary `tmp/v040-production.env` file was removed.
 
-- Initial complete regression suite passed: 36 tests, zero failed. Added a permanent original-56 SHA-256 content fixture/test for future regression protection; focused test run passed. Formatting found eight draft files needing normalization; wait until source reviewers finish before formatting owned files.
+## Remaining product work
 
-- Source audits complete: Rodak 80, Strasinger 84 and Harr 146 checked. Only concrete correction was para-h5-011 citation 703 → 701. Full scope/evidence/limitations are recorded in the four audit MDs. No independent professional review is claimed.
-- Local preview exec session 81287 uses LABSPRINT_DATA_DIR=tmp/v040-preview-data; contains only a synthetic QA learner. Browser verification in progress.
+The larger 2,000-per-subject target remains unfinished: 13,634 additional items are needed numerically. Counts do not establish syllabus coverage or exam readiness. Verified current Philippine law sources, thin-topic expansion, and independent qualified MLS review remain needed. Harr verification used retained page-marked text because its original PDF was unavailable. Email delivery and physical-device testing remain separate future work.
 
-- TypeScript check passed. Local browser reference shelf confirms ten source editions, Rodak80 and Strasinger84, and actual per-subject totals. Fixed singular wording for a source with one question. Remaining browser flows and final suite/build are pending.
+## How to resume later
 
-- Local browser verification complete: references80/84 and ten editions; five selected hematology items from three source editions confirmed via API; saved answer/bookmark and resume survivedrefresh; new Strasinger and Rodak rationales displayed their page citations; single-question replacement warning and recap worked. Phone320/390px and desktop1366px layouts checked; no horizontal overflow or browser warnings/errors. Screenshot: docs/screenshots/v040-reference-books.jpg.
-- Next: stop local preview81287, run final37-test suite/build/format/content checks, record outputs, then publish and verify.
+1. Read this file, [WORK-STATE.md](WORK-STATE.md), and the current Git status.
+2. Identify the new user request or the first genuinely unfinished step. Preserve question IDs, answer history, bookmarks, and saved sessions.
+3. Never recreate a completed batch, repeat completed migrations, upload source PDFs/extracts/credentials, or assume an interrupted check passed.
+4. During long tasks, update the active checklist after each major result. Record the exact next action and running session IDs before stopping when possible.
+5. If credits or approval checks become unavailable, save available progress and wait. Do not bypass an unavailable approval check.
 
-- Formatting passed for the complete source/test/docs tree. Local preview stopped. Final build running in exec66086 and final regression suite in exec5910; check their exit results before marking complete.
-
-- FINAL RESULTS CONFIRMED: exec66086 production build exited0 (TypeScript passed); exec5910 full suite exited0, 37passed/0failed. No required code checks remain. Next: record publication commit, deployexistingproject, checkREADY/domain andhostedbehavior, thenfinishcheckpoint.
+No implementation or publication work remains for this first batch. Future work should start with the remaining product needs or a new request.

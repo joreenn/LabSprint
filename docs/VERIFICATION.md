@@ -1,5 +1,28 @@
 # LabSprint verification records
 
+## Version 0.4.0 - 4 November 2026
+
+Production deployment `dpl_78C6EmXfejwxfCqnnG1ya7n9q8yJ` is READY at [labsprint.vercel.app](https://labsprint.vercel.app), with source commit `0ce5486e79985de7e80e63e8fea48451e1ac69ea` in Vercel metadata and no alias error. The live Settings screen displays version 0.4.0.
+
+### Automated and source checks
+
+- All 37 tests passed. The production build including TypeScript, content validation, and formatting passed.
+- The live bank has 366 questions across seven subjects and 42 topics: one empty topic and four one-question topics remain. Counts do not establish full syllabus coverage or exam readiness.
+- All 56 original question definitions are unchanged. A permanent semantic-content integrity fixture guards their IDs, keys, versions, references, and content.
+- Rechecked 80 Rodak questions and 84 Strasinger questions against the supplied PDFs, and 146 Harr questions against retained page-marked text. One Harr citation was corrected. These checks are not independent review by an MLS faculty member or medical professional. Details are in [the batch record](CONTENT-EXPANSION-2026-11-01.md) and its linked source audits.
+
+### Local browser/API checks
+
+Used the separate ignored `tmp/v040-preview-data` database with synthetic data. Checked source mixing (five unique hematology items from three editions), answer/bookmark persistence after refresh, saved session restoration, the larger coverage denominator, concise single-question review and replacement warning, both new book explanations/references, and question-level recap. Checked 320px and 390px phone widths and 1366px desktop width without horizontal overflow. The browser warning/error log was empty. The local preview was stopped and viewport overrides reset.
+
+### Hosted read-only checks and limits
+
+The live browser confirmed 366 question rows, ten source editions, 80 Rodak questions, 84 Strasinger questions, and version 0.4.0. The browser warning/error log was empty. Screenshot: `docs/screenshots/v040-live-references.jpg`.
+
+Automatic approval review rejected a proposed production test-account write under the earlier no-production-data-change constraint. That script never ran, no synthetic production account was created, and no existing learner account was used for mutations. Production write-flow verification was not completed for this release. The unused temporary production environment file was removed. Earlier release write checks below remain historical evidence rather than a v0.4.0 test result.
+
+No database migration or external authentication-setting change was made. Email recovery delivery remains disabled and unverified. Physical-device checks, independent MLS review, and further content expansion remain pending. Durable continuation instructions are in [RESUME-V040.md](RESUME-V040.md) and [WORK-STATE.md](WORK-STATE.md).
+
 ## Version 0.3.0 — 1 November 2026
 
 Production deployment `dpl_2gbLei2niAr3c8SLrhk2Jn9n4FtV` is READY at [labsprint.vercel.app](https://labsprint.vercel.app), with source commit `0048738c6268932f2b7518710e0f44368582306a` recorded in Vercel metadata. The live Settings screen displays version 0.3.0.

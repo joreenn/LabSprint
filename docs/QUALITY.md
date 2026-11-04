@@ -35,7 +35,7 @@ Focus tests on scoring, first-attempt calculations, missed-question handling, id
 
 ## 0.2 update acceptance flow
 
-These checks describe the release gate; their presence does not mean the in-progress update has passed them.
+These checks preserve the historical 0.2 release gate. Their presence does not mean they were rerun for the latest release; see VERIFICATION.md for completed checks.
 
 - [ ] Clicking an answer reveals a rationale immediately, before the save request resolves.
 - [ ] Next-question navigation is local and does not wait for a separate checkpoint request.
@@ -59,7 +59,7 @@ These checks describe the release gate; their presence does not mean the in-prog
 - [ ] A valid unused code resets the password on the existing user ID, preserves study history, consumes the code, and revokes sessions.
 - [ ] A used/invalid code fails without revealing whether an unrelated email exists; recovery endpoints are rate-limited.
 - [ ] The app does not promise email delivery without configured mail credentials and a verified sender.
-- [ ] The 56-item bank passes structure checks, retains all original IDs, and cites only inspected sources.
+- [ ] The available bank passes structure checks, retains all original IDs, and cites only inspected sources (56 items at the 0.2 release).
 
 ## Content quality gate
 
