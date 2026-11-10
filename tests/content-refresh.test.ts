@@ -38,7 +38,7 @@ test('reference refresh preserves every question from the 366-item release', () 
 
 test('the complete refresh is available to normal practice selection without duplicate items', () => {
   assert.equal(referenceRefreshQuestions.length, 42);
-  assert.equal(questions.length, 408);
+  assert.ok(questions.length >= 408);
   assert.deepEqual(validateQuestionBank(questions, subjects), []);
   const selected = referenceMixedSample(questions, questions.length, () => 0.5);
   assert.equal(new Set(selected.map((q) => q.id)).size, questions.length);

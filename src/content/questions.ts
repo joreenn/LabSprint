@@ -5,6 +5,7 @@ import { strasingerQuestions } from './strasinger-questions';
 import { harrExpansionQuestions } from './harr-expansion-questions';
 import { harrLaboratoryQuestions } from './harr-laboratory-questions';
 import { referenceRefreshQuestions } from './reference-refresh-questions';
+import { returnedReviewerQuestions } from './returned-reviewer-questions';
 
 export const subjects: Subject[] = [
   {
@@ -21,6 +22,8 @@ export const subjects: Subject[] = [
       'Proteins',
       'Enzymes',
       'Endocrinology',
+      'Lipids and lipoproteins',
+      'Liver function',
     ],
   },
   {
@@ -52,6 +55,7 @@ export const subjects: Subject[] = [
       'Synovial fluid',
       'Serous fluids',
       'Other body fluids',
+      'Renal physiology',
     ],
   },
   {
@@ -66,6 +70,7 @@ export const subjects: Subject[] = [
       'Virology',
       'Specimen collection',
       'Antimicrobial susceptibility',
+      'Microbial molecular testing',
     ],
   },
   {
@@ -153,6 +158,7 @@ function item(
 // Original educational items. PDF page numbers are 1-based viewer pages, not printed pages.
 // This starter bank is source-checked but still requires independent faculty review before expansion.
 export const questions: Question[] = [
+  ...returnedReviewerQuestions,
   ...extraQuestions,
   item(
     'cc-001',

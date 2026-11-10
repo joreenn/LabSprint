@@ -788,7 +788,7 @@ export function Preferences({
               Spot something unclear? Flag it from the answer explanation. Question IDs and versions
               make corrections traceable.
             </p>
-            <span className="pill">LabSprint v0.4.1 · Expanding practice bank</span>
+            <span className="pill">LabSprint v0.4.2 · Expanding practice bank</span>
           </section>
           <button className="button secondary" onClick={onSignOut}>
             <LogOut size={17} />
