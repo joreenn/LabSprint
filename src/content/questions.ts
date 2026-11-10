@@ -4,6 +4,7 @@ import { rodakQuestions } from './rodak-questions';
 import { strasingerQuestions } from './strasinger-questions';
 import { harrExpansionQuestions } from './harr-expansion-questions';
 import { harrLaboratoryQuestions } from './harr-laboratory-questions';
+import { referenceRefreshQuestions } from './reference-refresh-questions';
 
 export const subjects: Subject[] = [
   {
@@ -35,6 +36,7 @@ export const subjects: Subject[] = [
       'Antiglobulin testing',
       'Blood groups',
       'Antibody identification',
+      'Immune cells and complement',
     ],
   },
   {
@@ -107,6 +109,7 @@ export const subjects: Subject[] = [
       'Laboratory statistics',
       'Management',
       'Standards and calibration',
+      'Laboratory safety',
       'Histopathology',
       'Philippine Medtech Laws',
     ],
@@ -1330,4 +1333,5 @@ export const questions: Question[] = [
   ...strasingerQuestions,
   ...harrExpansionQuestions,
   ...harrLaboratoryQuestions,
+  ...referenceRefreshQuestions,
 ];

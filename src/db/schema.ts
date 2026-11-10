@@ -146,8 +146,12 @@ export const recoveryCode = pgTable(
   (t) => [index('recovery_code_user_idx').on(t.userId)],
 );
 
-export const recoveryRateLimit = pgTable('recovery_rate_limit', {
-  key: text('key').primaryKey(),
-  count: integer('count').notNull(),
-  windowStart: time('window_start').notNull().defaultNow(),
-});
+export const recoveryRateLimit = pgTable(
+  'recovery_rate_limit',
+  {
+    key: text('key').primaryKey(),
+    count: integer('count').notNull(),
+    windowStart: time('window_start').notNull().defaultNow(),
+  },
+  (t) => [index('recovery_rate_limit_window_idx').on(t.windowStart)],
+);

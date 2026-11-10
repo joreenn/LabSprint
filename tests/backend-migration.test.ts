@@ -14,6 +14,8 @@ test('appearance migration preserves pre-existing accounts, progress and setting
     await client.exec(migrations[1].sql);
     await client.exec(migrations[2].sql);
     await client.exec(migrations[2].sql);
+    await client.exec(migrations[3].sql);
+    await client.exec(migrations[3].sql);
     const row = (
       await client.query<{ dailyGoal: number; sessionId: string; appearance: null }>(
         `SELECT (settings->>'dailyGoal')::int AS "dailyGoal", active_session->>'id' AS "sessionId", appearance FROM study_preferences WHERE user_id='existing'`,

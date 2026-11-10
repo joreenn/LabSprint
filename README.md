@@ -6,7 +6,7 @@ This is a test project with a deliberately small, source-checked starter questio
 
 ## Latest updates
 
-Version 0.4.0 expands the live bank to 366 original questions, including 80 from Rodak and 84 from Strasinger, and mixes eligible reference sources in practice sessions. Source and verification details are in [the expansion record](docs/CONTENT-EXPANSION-2026-11-01.md); [the active checkpoint](docs/RESUME-V040.md) tracks publication status. This first batch does not complete the longer-term 2,000-per-subject goal.
+Version 0.4.1 adds 42 original source-checked questions, bringing the bank to 408 while preserving all 366 existing items. The batch uses the available Harr fourth/fifth editions, Apollon, Hubbard, Rodak, and Strasinger PDFs. See [the refresh record](docs/CONTENT-REFRESH-2026-11-10.md) for checked pages, duplicate review, source-availability limits, and validation. Practice continues to mix eligible reference sources. The longer-term 2,000-per-subject goal remains unfinished.
 
 Version 0.3.0 adds clearer progress definitions, content checks, compact mobile practice, question-level recaps, and improved recovery states. See the [update notes](docs/USABILITY-UPDATE.md) and run `npm run content:check` to inspect bank structure. Release publication and hosted verification are tracked in [the work checkpoint](docs/WORK-STATE.md).
 

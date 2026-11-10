@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { and, eq, isNull, like, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, like, lt, sql } from 'drizzle-orm';
 import { getDb } from '@/db';
 import * as tables from '@/db/schema';
 import { getAuth } from './auth';
@@ -28,12 +28,35 @@ export async function limitRecovery(keys: { key: string; max: number; seconds: n
         .onConflictDoUpdate({
           target: tables.recoveryRateLimit.key,
           set: {
-            count: sql`CASE WHEN ${tables.recoveryRateLimit.windowStart} < ${cutoff} THEN 1 ELSE ${tables.recoveryRateLimit.count} + 1 END`,
+            count: sql`CASE WHEN ${tables.recoveryRateLimit.windowStart} < ${cutoff} THEN 1 ELSE LEAST(${tables.recoveryRateLimit.count}, ${item.max}) + 1 END`,
             windowStart: sql`CASE WHEN ${tables.recoveryRateLimit.windowStart} < ${cutoff} THEN ${now} ELSE ${tables.recoveryRateLimit.windowStart} END`,
           },
         })
         .returning({ count: tables.recoveryRateLimit.count });
-      if (row.count > item.max) limited = true;
+      if (row.count > item.max) {
+        limited = true;
+        // Commit this bucket's accounting, but do not touch later email/user buckets.
+        break;
+      }
+    }
+    if (!limited) {
+      // Every configured window is 15 minutes. Retain a day, then prune a bounded
+      // indexed batch on admitted requests; expired selectors must not grow forever.
+      const expiredBefore = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      const expired = tx
+        .select({ key: tables.recoveryRateLimit.key })
+        .from(tables.recoveryRateLimit)
+        .where(lt(tables.recoveryRateLimit.windowStart, expiredBefore))
+        .orderBy(asc(tables.recoveryRateLimit.windowStart))
+        .limit(100);
+      await tx
+        .delete(tables.recoveryRateLimit)
+        .where(
+          and(
+            lt(tables.recoveryRateLimit.windowStart, expiredBefore),
+            inArray(tables.recoveryRateLimit.key, expired),
+          ),
+        );
     }
   });
   if (limited)

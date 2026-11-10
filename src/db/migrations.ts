@@ -66,4 +66,8 @@ CREATE TABLE IF NOT EXISTS recovery_rate_limit (
 );
 `,
   },
+  {
+    version: 4,
+    sql: `CREATE INDEX IF NOT EXISTS recovery_rate_limit_window_idx ON recovery_rate_limit(window_start);`,
+  },
 ];

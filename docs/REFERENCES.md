@@ -1,5 +1,9 @@
 # Question bank and source record
 
+## Current refresh - 10 November 2026
+
+The bank now contains **408 original questions**: 42 new items across the seven subject groups, with all 366 earlier items preserved unchanged. The available Harr fourth/fifth editions, Apollon, Hubbard, Rodak, and Strasinger PDFs were reopened for targeted source checking. [The refresh record](CONTENT-REFRESH-2026-11-10.md) lists every new objective and checked viewer page, duplicate-review evidence, and the previously supplied books unavailable for a fresh scan. The older inventory below is historical.
+
 ## Current expansion — 1 November 2026
 
 The current bank has **366 original questions** after the first **310-item** expansion. Standalone Rodak (7th edition, 2025) and Strasinger (7th edition, 2021) are now integrated. See [the current inventory and source audits](CONTENT-EXPANSION-2026-11-01.md) for exact counts, checked pages, source-mixing behavior, and limitations. The original 56 items below are preserved unchanged; their inventory is the historical starter record. The requested 2,000-per-subject goal remains unfinished and is tracked explicitly.

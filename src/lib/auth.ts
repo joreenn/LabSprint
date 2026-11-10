@@ -2,11 +2,10 @@ import { randomBytes } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { betterAuth } from 'better-auth';
-import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { nextCookies } from 'better-auth/next-js';
 import { getDb } from '../db';
-import * as schema from '../db/schema';
 import { isRecoveryConfigured, sendRecoveryEmail } from './mail';
+import { credentialAdapter } from './credential-adapter';
 
 export function getTrustedOrigins(): string[] {
   const configured = process.env.BETTER_AUTH_URL;
@@ -47,7 +46,7 @@ async function createAuth() {
     appName: 'LabSprint',
     baseURL,
     secret: secret(),
-    database: drizzleAdapter(await getDb(), { provider: 'pg', schema, transaction: true }),
+    database: credentialAdapter(await getDb()),
     trustedOrigins: getTrustedOrigins(),
     emailAndPassword: {
       enabled: true,

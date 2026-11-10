@@ -16,6 +16,12 @@ Code consumption, the credential update, and session revocation run in one datab
 
 Unauthenticated recovery attempts are rate-limited in the database by trusted ingress IP and hashed email. Incorrect codes and unknown accounts receive the same public error. Code generation is authenticated, separately rate-limited, and requires the current password.
 
+### Recovery concurrency and accounting safeguards
+
+The authentication adapter snapshots the credential read for each sign-in or password-change request. Before creating a session or committing a password change, it locks the same user row used by saved-code recovery and checks that the stored credential still matches that snapshot. The check and resulting write share one transaction. A password proof paused before recovery cannot create a session or overwrite the recovered password afterward; the request receives `CREDENTIALS_CHANGED` and must sign in again. Password changes acquire the lock before revoking sessions, so a stale request cannot revoke the owner's fresh post-recovery session. Email-token resets also acquire that user lock before revocation and password replacement. These are database locks shared across app instances, rather than process-local locks. Both HTTP and server API calls use this adapter.
+
+Recovery accounting processes the IP bucket before the email bucket and stops at the first exhausted bucket. That bucket's count is committed, but later buckets are untouched. An already-blocked IP therefore cannot consume another email's recovery allowance or create more email-accounting keys. Counts saturate at the bucket's limit plus one. Admitted requests prune at most 100 accounting rows older than one day; current policy windows are 15 minutes. Migration 4 adds an index on `recovery_rate_limit.window_start` for the bounded cleanup query. Apply pending migrations to the hosted database before deploying this update; local PGlite applies them automatically.
+
 If an existing user forgets a password before saving any recovery codes, this mechanism cannot retroactively prove their identity. Creating codes requires the current password, even when a device still has a signed-in session. An established email recovery channel or another independently verified recovery process is required in that case; do not bypass account ownership checks or create a replacement account expecting old progress to appear automatically.
 
 ## Optional email recovery
@@ -51,5 +57,7 @@ Provider references: [Better Auth email/password recovery](https://www.better-au
 `tests/recovery.test.ts` runs against an isolated embedded database. It checks current-password reauthentication, hash-only code storage, rotation invalidation, unchanged progress, invalid-password protection, concurrent consumption, reuse rejection, old-session invalidation, new-password sign-in, account isolation, hostile-origin rejection, generic errors, persistent rate limits, and the optional email token's one-use and expired-link flows with an in-memory mail transport. Email reset is also checked for preserved recovery codes and account identity, session revocation, identical unknown/known request responses, and generic dispatch-failure diagnostics.
 
 No production email, recovery token, code, password, or learner account is used by the automated tests.
+
+[The recovery security regressions](../tests/recovery-security.test.ts) pause real password verification at a deterministic barrier and complete recovery before resuming it. They cover stale sign-in after saved-code and email-token recovery, stale password changes, preservation of the owner's new session, legitimate password changes, direct server API sign-in, denied-IP isolation, saturated counters, and bounded expiry cleanup. These implementation tests use disposable local PGlite state and dummy credentials. They do not establish deployed PostgreSQL concurrency, ingress policy, inbox delivery, or completion of the separate security audit.
 
 Actual inbox delivery remains unverified without the owner's verified sender and configured email service. Passing mocked transport tests is not a delivery claim.
