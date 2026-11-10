@@ -6,7 +6,9 @@ This is a test project with a deliberately small, source-checked starter questio
 
 ## Latest updates
 
-Version 0.4.2 adds 42 original questions from the five returned Linné & Ringsrud, Elsevier, Ciulla/Lehman fourth-edition SUCCESS!, Jarreau fifth-edition Bottom Line, and Alba Volume 2 PDFs. The bank now has **450 questions**, preserving all 408 previous items. Six additions per subject include six histopathology questions. See [the November 11 review](docs/CONTENT-REFRESH-2026-11-11.md) for source pages, accuracy checks, and duplicate-review limits. Practice continues to mix eligible reference sources. The longer-term 2,000-per-subject goal remains unfinished.
+Version 0.4.3 adds **24 original questions**, 12 each for Microbiology and Parasitology, bringing the bank to **474** while preserving all 450 previous question objects. The additions use checked pages in the supplied Elsevier first edition and Ciulla/Lehman fourth-edition SUCCESS! PDFs. See [the continuation record](docs/CONTENT-CONTINUATION-2026-11-11.md) for source pages, accuracy checks, and duplicate review. Practice continues to mix eligible reference sources. The longer-term 2,000-per-subject goal remains unfinished.
+
+Version 0.4.2 added 42 original questions from the five returned Linné & Ringsrud, Elsevier, Ciulla/Lehman fourth-edition SUCCESS!, Jarreau fifth-edition Bottom Line, and Alba Volume 2 PDFs, taking the bank to 450. Its six additions per subject included six histopathology questions. See [the earlier November 11 review](docs/CONTENT-REFRESH-2026-11-11.md).
 
 Version 0.4.1 added the preceding 42 questions from Harr fourth/fifth editions, Apollon, Hubbard, Rodak, and Strasinger. Its source checks remain recorded in [the November 10 review](docs/CONTENT-REFRESH-2026-11-10.md).
 
@@ -20,7 +22,7 @@ For the previous 0.2 release, the production build passed, hosted additive migra
 
 ## Hosted project
 
-LabSprint **0.4.2** is live at [labsprint.vercel.app](https://labsprint.vercel.app). Deployment `dpl_BsDUYV4YU5iqySkALZfqjXMrAB1F` is READY and promoted, built from commit `6ec56ee7d995d42e7be9c30dde00ba597acb0813`. The canonical alias and commit metadata were verified. Anonymous checks found all 408 previous stems and 42 new IDs/stems in served assets, version 0.4.2, home HTTP 200, and workspace HTTP 401. All 47 tests and the production build passed. A disposable local account verified a new answer and its citation; this release performed no production account/progress writes. See [the release checkpoint](docs/RESUME-V042.md) and [source review](docs/CONTENT-REFRESH-2026-11-11.md).
+LabSprint **0.4.3** is live at [labsprint.vercel.app](https://labsprint.vercel.app). Deployment `dpl_9Kf4Etc28xcHq9Mynj6mUvyY16dL` is READY and promoted, built from commit `14ce15bb1628a81cbb17a3562ef090886e8702ab`. The canonical alias and commit metadata were verified. Anonymous checks found all 450 previous stems and 24 new IDs/stems in served assets, version 0.4.3, home HTTP 200, and workspace HTTP 401. All 14 targeted content tests, TypeScript, formatting, content validation, and the production build passed. This content-only release performed no production account/progress writes. See [the release checkpoint](docs/RESUME-V043.md) and [source review](docs/CONTENT-CONTINUATION-2026-11-11.md).
 
 Vercel project `labsprint` is configured in `joreenns-projects`, with a production-only Neon Free database named `labsprint-db` in Singapore (`sin1`). Hosted migrations include the additive appearance and recovery-code changes, and authentication/database secrets are configured in Vercel. Production has public access as approved by the owner; previews remain protected. Source is versioned in [joreenn/LabSprint](https://github.com/joreenn/LabSprint). Vercel deployments currently use source uploads; automatic Git deployments are not configured. See [deployment details](docs/DEPLOYMENT.md).
 

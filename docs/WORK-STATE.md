@@ -4,7 +4,11 @@
 
 If credits or tool approvals become unavailable, stop at the current checkpoint and wait for the user to return. Resume from saved work; do not restart completed implementation, migrations, or deployments unnecessarily. Do not bypass an unavailable approval check.
 
-## Latest checkpoint: v0.4.2 published (11 November 2026)
+## Latest checkpoint: v0.4.3 published (11 November 2026)
+
+Added **24 original questions**, 12 each for Microbiology and Parasitology, increasing **450 to 474** with every previous question object preserved. All 14 targeted content tests, TypeScript, formatting, content validation, and the production build passed. Runtime commit `14ce15bb1628a81cbb17a3562ef090886e8702ab` was pushed and deployed as `dpl_9Kf4Etc28xcHq9Mynj6mUvyY16dL`, READY and promoted to [labsprint.vercel.app](https://labsprint.vercel.app). Live assets contained all 474 stems and version 0.4.3; anonymous home/workspace returned 200/401. Read [RESUME-V043.md](RESUME-V043.md) before further content work. This batch is complete. Conserve credits and do not automatically launch agents.
+
+## Earlier checkpoint: v0.4.2 published (11 November 2026)
 
 The five returned books have been used for **42 further questions**, bringing the bank to **450** with all 408 previous objects preserved. All 47 tests, TypeScript, formatting, content validation, the production build, and representative local browser/API checks passed. Runtime source `6ec56ee7d995d42e7be9c30dde00ba597acb0813` was pushed and deployed as `dpl_BsDUYV4YU5iqySkALZfqjXMrAB1F`, READY and promoted to [labsprint.vercel.app](https://labsprint.vercel.app). Live assets contained all 450 stems and version 0.4.2. Read [RESUME-V042.md](RESUME-V042.md) before further content work. Do not repeat completed scans, tests, or deployment without new changes, or automatically launch agents.
 
