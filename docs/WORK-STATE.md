@@ -4,7 +4,15 @@
 
 If credits or tool approvals become unavailable, stop at the current checkpoint and wait for the user to return. Resume from saved work; do not restart completed implementation, migrations, or deployments unnecessarily. Do not bypass an unavailable approval check.
 
-## Latest checkpoint: v0.4.0 published (4 November 2026)
+## Latest checkpoint: v0.4.2 published (11 November 2026)
+
+The five returned books have been used for **42 further questions**, bringing the bank to **450** with all 408 previous objects preserved. All 47 tests, TypeScript, formatting, content validation, the production build, and representative local browser/API checks passed. Runtime source `6ec56ee7d995d42e7be9c30dde00ba597acb0813` was pushed and deployed as `dpl_BsDUYV4YU5iqySkALZfqjXMrAB1F`, READY and promoted to [labsprint.vercel.app](https://labsprint.vercel.app). Live assets contained all 450 stems and version 0.4.2. Read [RESUME-V042.md](RESUME-V042.md) before further content work. Do not repeat completed scans, tests, or deployment without new changes, or automatically launch agents.
+
+## Earlier checkpoint: v0.4.1 published (10 November 2026)
+
+**Paused at the user's request to conserve credits.** Read [RESUME-V041.md](RESUME-V041.md) before continuing. The 408-question release, security fixes, production migration 4, commit/push, and deployment are complete and verified. Remaining work is locating unavailable reviewer PDFs and optional release-document housekeeping. Do not repeat completed work or automatically launch agents.
+
+## Earlier checkpoint: v0.4.0 published (4 November 2026)
 
 **Status: first expansion batch complete and live.** Source commit `0ce5486e79985de7e80e63e8fea48451e1ac69ea` is on main. Production deployment `dpl_78C6EmXfejwxfCqnnG1ya7n9q8yJ` is READY at https://labsprint.vercel.app, with matching commit metadata and no alias error.
 

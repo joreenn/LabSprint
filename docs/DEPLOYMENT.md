@@ -12,15 +12,15 @@
 | Database scope          | Production only                                                                          |
 | Authentication          | Better Auth email/password, secrets configured in Vercel                                 |
 | Canonical auth origin   | `https://labsprint.vercel.app`                                                           |
-| Current release         | LabSprint 0.4.0, 4 November 2026                                                         |
-| Current deployment      | `dpl_78C6EmXfejwxfCqnnG1ya7n9q8yJ` — READY                                               |
-| Source commit           | `0ce5486e79985de7e80e63e8fea48451e1ac69ea`                                               |
+| Current release         | LabSprint 0.4.2, 11 November 2026                                                        |
+| Current deployment      | `dpl_BsDUYV4YU5iqySkALZfqjXMrAB1F` — READY and promoted                                  |
+| Source commit           | `6ec56ee7d995d42e7be9c30dde00ba597acb0813`                                               |
 | Source integration      | Direct source upload from versioned source; automatic Git deployments are not configured |
 | Access                  | Public production approved by the owner; protected previews                              |
 
-Vercel confirmed the current deployment is READY with the canonical alias and matching source commit. Hosted read-only browser checks confirmed 366 items, both new reference books, and version 0.4.0. All 37 local tests and the production build passed; local browser/API checks covered source selection, persistence, refresh/resume, and new question explanations. Automatic approval review blocked a proposed production test-account write, so that test did not run. No existing learner account was used for mutations. See [VERIFICATION.md](VERIFICATION.md) for exact check boundaries and historical recovery evidence.
+Vercel confirmed the current deployment is READY with the canonical alias and matching source commit. Anonymous HTTP and served-asset checks confirmed 450 question stems (408 existing and 42 new), the 42 new IDs, and version 0.4.2. All 47 local tests, TypeScript, formatting, content checks, and the production build passed. A disposable local production account verified the new bilirubin question, its saved correct version-1 answer, all explanations, and Jarreau page 132. A 390-pixel viewport had no horizontal overflow. No production account/progress writes were performed. See [the current checkpoint](RESUME-V042.md) for exact boundaries and [VERIFICATION.md](VERIFICATION.md) for historical recovery evidence.
 
-Hosted migrations 2 (appearance) and 3 (recovery-code hashes) were applied additively using Vercel's production environment runner. Existing accounts and history were not replaced. The initial 30 October deployment was `dpl_8sZynD9k3P1HEpwnnN4hMCiMPVpv`; it is retained as historical release information rather than the current version.
+Hosted migrations 2 (appearance), 3 (recovery-code hashes), and 4 (recovery-accounting index) were applied additively using Vercel's production environment runner. Migration 4 was verified during the 0.4.1 release and was not repeated for this content-only release. Existing accounts and history were not replaced. The initial 30 October deployment was `dpl_8sZynD9k3P1HEpwnnN4hMCiMPVpv`; it is retained as historical release information rather than the current version.
 
 Local accounts and progress under `.data/` are separate from the hosted database and are not automatically copied. New hosted users create their accounts on the canonical production origin.
 
@@ -28,7 +28,7 @@ Use only [labsprint.vercel.app](https://labsprint.vercel.app) for learners. Auth
 
 ## Files and secrets
 
-The 0.4.0 upload used an explicit allowlist of 71 source/configuration files. No book PDFs, extracted text, `.data/`, or `.env` files were uploaded. `.vercelignore` also excludes private/generated files for future CLI deployments. Review this file whenever adding data or tooling to the project.
+The 0.4.2 upload used an explicit allowlist of 74 source/configuration files exported from the committed source. No book PDFs, extracted text, local data, credentials, audit artifacts, or local skills were uploaded. `.vercelignore` also excludes private/generated files for future CLI deployments. Review this file whenever adding data or tooling to the project.
 
 Vercel holds these production variables; their values must remain private:
 
@@ -85,6 +85,6 @@ These are acceptance steps, not claims that every hosted check has already passe
 
 ## Operational limits
 
-The test edition contains 366 original questions, including additions checked against the supplied standalone Strasinger and Rodak PDFs. It is not comprehensive or independently expert-validated exam coverage. See the source-audit records for checked pages and limitations. Philippine Medtech Laws questions require verified current Philippine primary sources. Password recovery uses saved one-time codes; the owner chose this approach instead of configuring an email-sending domain. Optional email plumbing remains disabled without provider credentials and a verified sender. Full offline practice, account deletion, backups policy, and content administration remain future work. Use provider backup options as progress becomes important.
+The test edition contains 450 original questions. It is not comprehensive or independently expert-validated exam coverage. See the source-audit records for checked pages and limitations. Philippine Medtech Laws questions require verified current Philippine primary sources. Password recovery uses saved one-time codes; the owner chose this approach instead of configuring an email-sending domain. Optional email plumbing remains disabled without provider credentials and a verified sender. Full offline practice, account deletion, backups policy, and content administration remain future work. Use provider backup options as progress becomes important.
 
 Anyone who receives the public production link may register. Each account's stored progress remains private to that account. Sharing the URL is not an invitation-code access control mechanism.

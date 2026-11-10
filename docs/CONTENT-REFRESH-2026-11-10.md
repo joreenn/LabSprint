@@ -2,6 +2,10 @@
 
 This batch adds **42 original questions**, six in each subject group, taking the bank from **366 to 408**. Every existing question is preserved, including its ID, options, explanations, key, version, and source. The new items are in [the refresh module](../src/content/reference-refresh-questions.ts). All have four explained choices, one key, a takeaway, version 1, and a checked **1-based PDF viewer page**.
 
+## Publication evidence (recorded from the completed v0.4.1 checkpoint)
+
+Runtime commit `ca491daeeeb03268f2420f898e132be84ff09fb1` was pushed and published as deployment `dpl_8KU3Deofvm1xstrXTaRh4XENrY4V`, READY and promoted to the canonical domain. All 45 tests, TypeScript, formatting, content validation, and the production build passed. A disposable local browser/API flow verified `cc-n26-001`, its explanations, and Harr page 296. Hosted anonymous checks found all 366 previous stems, 42 new IDs/stems, and v0.4.1 across 12 served assets, with home 200 and workspace 401. Production migration 4 was applied and verified during that release; it must not be repeated. This is historical evidence, not a new deployment or rerun. The five unavailable books listed below were subsequently returned and reviewed for [the November 11 batch](CONTENT-REFRESH-2026-11-11.md).
+
 ## Sources actually available and checked
 
 The owner's three re-supplied books and three other available reviewer PDFs were freshly opened. Text was indexed across all pages of the five text-readable books to locate relevant material. Apollon has no usable text layer: section-header contact sheets covering its 72 pages were visually scanned, followed by full-page inspection of pages 1, 39, 64, 65, and 66. The newly cited Apollon pages are 39, 64, and 65. The matching full-page image of Hubbard page 310 was also checked because its ameba comparison is a figure.
