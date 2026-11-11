@@ -29,10 +29,11 @@ import {
   dailyProgress,
   firstAttempts,
   latestAttempts,
-  localDay,
   percent,
   progressFor,
   questionMap,
+  studyStreak,
+  studyStreakWeek,
   suggestedSubject,
 } from '@/lib/progress';
 import type { View, Workspace } from './types';
@@ -40,6 +41,8 @@ import { fmt, SubjectIcon, PageHeading, Stat, SubjectCard, QuestionRow, Empty } 
 import { Practice } from './practice';
 import { ReferenceShelf } from './reference-shelf';
 import { ProgressFacts, ProgressGuide } from './progress-signals';
+import { StudyStreakCard } from './study-streak';
+
 export function Dashboard({
   workspace: w,
   name,
@@ -53,11 +56,11 @@ export function Dashboard({
   onView: (v: View) => void;
   onResume: () => void;
 }) {
-  const p = progressFor(w.attempts),
-    first = firstAttempts(w.attempts),
-    today = w.attempts.filter(
-      (a) => localDay(a.createdAt) === localDay(new Date().toISOString()),
-    ).length;
+  const now = new Date();
+  const p = progressFor(w.attempts);
+  const first = firstAttempts(w.attempts);
+  const streak = studyStreak(w.attempts, now);
+  const today = streak.answeredToday;
   const suggestion = suggestedSubject(w.attempts);
   return (
     <>
@@ -68,7 +71,7 @@ export function Dashboard({
           description="Your next milestone starts with one good study session."
           action={
             <span className="date-label">
-              {new Date().toLocaleDateString('en', {
+              {now.toLocaleDateString('en', {
                 weekday: 'short',
                 month: 'short',
                 day: 'numeric',
@@ -119,9 +122,6 @@ export function Dashboard({
         <section className="goal-card">
           <div className="card-topline">
             <span className="label">TODAY’S LITTLE WIN</span>
-            <span className="goal-icon">
-              <Target size={19} />
-            </span>
           </div>
           <div className="goal-number">
             {today}
@@ -136,10 +136,7 @@ export function Dashboard({
               ? 'Goal met. Nice work!'
               : `${w.settings.dailyGoal - today} more to your daily goal`}
           </div>
-          <div className="goal-bottom">
-            <Sparkles size={17} />
-            <span>Consistency over perfection.</span>
-          </div>
+          <StudyStreakCard streak={streak} week={studyStreakWeek(w.attempts, now)} />
         </section>
       </div>
       <div className="stats-grid">
@@ -453,8 +450,10 @@ export function ReviewQueue({
   );
 }
 export function Progress({ workspace: w }: { workspace: Workspace }) {
-  const p = progressFor(w.attempts),
-    days = dailyProgress(w.attempts);
+  const now = new Date();
+  const p = progressFor(w.attempts);
+  const days = dailyProgress(w.attempts, now);
+  const streak = studyStreak(w.attempts, now);
   const first = firstAttempts(w.attempts);
   const max = Math.max(5, ...days.map((d) => d.count));
   return (
@@ -498,6 +497,7 @@ export function Progress({ workspace: w }: { workspace: Workspace }) {
       </div>
       <ProgressGuide stats={p} />
       <section className="panel trend-panel">
+        <StudyStreakCard streak={streak} week={studyStreakWeek(w.attempts, now)} />
         <div className="section-heading">
           <div>
             <h2>A little progress, day by day</h2>

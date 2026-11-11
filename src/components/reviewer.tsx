@@ -24,7 +24,7 @@ import {
 import { authClient } from '@/lib/auth-client';
 import { questions, subjects } from '@/content/questions';
 import type { Question } from '@/content/types';
-import { latestAttempts, questionMap, shuffled } from '@/lib/progress';
+import { firstDailyStreakSave, latestAttempts, questionMap, shuffled } from '@/lib/progress';
 import type { View, PracticeSession, Workspace } from './reviewer/types';
 import { api, ApiError } from './reviewer/api';
 import { nav, Brand } from './reviewer/shared';
@@ -50,6 +50,7 @@ import {
 import { StudyTimer } from './reviewer/study-timer';
 import { sessionRecap } from '@/lib/practice-review';
 import { usePracticeOutbox } from './reviewer/use-practice-outbox';
+import { StreakCelebration, type DailyStreakCelebration } from './reviewer/study-streak';
 import './reviewer/update.css';
 import './reviewer/usability.css';
 export default function Reviewer() {
@@ -75,12 +76,21 @@ export default function Reviewer() {
   const [discardConfirm, setDiscardConfirm] = useState(false);
   const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [recoveryRemaining, setRecoveryRemaining] = useState<number | null>(null);
+  const [celebration, setCelebration] = useState<DailyStreakCelebration | null>(null);
+  const lastCelebratedDay = useRef<string | null>(null);
   const loaded = useRef(false);
   const currentUser = useRef<string | undefined>(undefined);
   const bookmarkPending = useRef(new Set<string>());
   const answerLock = useRef(new Set<string>());
   const outbox = usePracticeOutbox(session?.user.id, (task, result) => {
     if (!result || task.kind !== 'answer') return;
+    if (view === 'practice' && workspace && active?.id === task.sessionId && !report) {
+      const daily = firstDailyStreakSave(workspace.attempts, result.attempt);
+      if (daily && daily.date !== lastCelebratedDay.current) {
+        lastCelebratedDay.current = daily.date;
+        setCelebration(daily);
+      }
+    }
     setWorkspace((w) =>
       w
         ? {
@@ -151,6 +161,8 @@ export default function Reviewer() {
     setTimerOpen(false);
     setRecoveryOpen(false);
     setRecoveryRemaining(null);
+    setCelebration(null);
+    lastCelebratedDay.current = null;
     answerLock.current.clear();
     loaded.current = false;
     if (session?.user.id) void refresh();
@@ -229,11 +241,18 @@ export default function Reviewer() {
       localStorage.setItem('labsprint-theme', dark ? 'light' : 'dark');
     } catch {}
   };
-  const changeView = (next: View) => {
+  const changeView = useCallback((next: View) => {
     setView(next);
     setSummary(null);
     window.scrollTo({ top: 0, behavior: 'instant' });
-  };
+  }, []);
+  const finishStreak = useCallback(() => {
+    setCelebration(null);
+    changeView('dashboard');
+    requestAnimationFrame(() =>
+      document.getElementById('main-content')?.focus({ preventScroll: true }),
+    );
+  }, [changeView]);
   const handleMutationError = async (error: unknown) => {
     // A different device can advance or replace a session. Reload its saved
     // state before showing the conflict so the next action uses fresh data.
@@ -429,14 +448,6 @@ export default function Reviewer() {
           <div className="topbar-right">
             <button
               className="icon-button"
-              aria-label="Customize colors"
-              title="Customize colors"
-              onClick={() => setAppearanceOpen(true)}
-            >
-              <Palette size={19} />
-            </button>
-            <button
-              className="icon-button"
               aria-label="Open study timer"
               title="Study timer"
               onClick={() => setTimerOpen((open) => !open)}
@@ -454,18 +465,11 @@ export default function Reviewer() {
               <span />
               Study mode · Untimed
             </span>
-            <button
-              className="icon-button"
-              aria-label={dark ? 'Use light theme' : 'Use dark theme'}
-              onClick={toggleTheme}
-            >
-              {dark ? <Sun size={19} /> : <Moon size={19} />}
-            </button>
-            <span className="avatar small">{firstName.slice(0, 1).toUpperCase()}</span>
           </div>
         </header>
         <main
           id="main-content"
+          tabIndex={-1}
           className={`main-content ${active && view === 'practice' ? 'practice-main' : ''} ${view === 'dashboard' ? 'overview-main' : ''}`}
         >
           <div
@@ -633,9 +637,19 @@ export default function Reviewer() {
                   Choose a ready-made palette or mix your own colors. Preview the dashboard and
                   practice screen before applying.
                 </p>
-                <button className="button primary" onClick={() => setAppearanceOpen(true)}>
-                  Choose my colors <Palette size={16} />
-                </button>
+                <div className="appearance-settings-actions">
+                  <button className="button primary" onClick={() => setAppearanceOpen(true)}>
+                    Choose my colors
+                  </button>
+                  <button className="button secondary" aria-pressed={dark} onClick={toggleTheme}>
+                    {dark ? (
+                      <Sun size={17} aria-hidden="true" />
+                    ) : (
+                      <Moon size={17} aria-hidden="true" />
+                    )}
+                    Dark mode: {dark ? 'on' : 'off'}
+                  </button>
+                </div>
               </section>
               <RecoveryCodesPanel />
             </div>
@@ -772,6 +786,7 @@ export default function Reviewer() {
         </Modal>
       ) : null}
       <StudyTimer open={timerOpen} onClose={() => setTimerOpen(false)} userId={workspace.user.id} />
+      {celebration ? <StreakCelebration value={celebration} onDone={finishStreak} /> : null}
     </div>
   );
 }

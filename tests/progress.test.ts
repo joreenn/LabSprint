@@ -2,9 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   dailyProgress,
+  firstDailyStreakSave,
   firstAttempts,
   latestAttempts,
   progressFor,
+  studyStreak,
+  studyStreakWeek,
   LIMITED_PRACTICE_THRESHOLD,
   type AttemptRecord,
 } from '../src/lib/progress';
@@ -150,4 +153,81 @@ test('bank has unique stable IDs, four explained choices and real source identif
     assert.ok(q.options.every((o) => o.rationale.length > 20));
     assert.ok(q.source.pdfPage > 0 && q.source.title.length > 5 && q.source.chapter.length > 2);
   }
+});
+
+test('study streak counts saved practice days, including wrong answers and repeats', () => {
+  const q = questions[0];
+  const at = (day: number, hour: number) => new Date(2026, 9, day, hour).toISOString();
+  const records = [
+    attempt('a', q.id, false, at(29, 23)),
+    attempt('b', q.id, true, at(30, 0)),
+    attempt('c', q.id, false, at(30, 12)),
+  ];
+  assert.deepEqual(studyStreak(records, new Date(2026, 9, 30, 13)), {
+    current: 2,
+    longest: 2,
+    answeredToday: 2,
+  });
+  assert.deepEqual(studyStreak(records, new Date(2026, 9, 31, 23)), {
+    current: 2,
+    longest: 2,
+    answeredToday: 0,
+  });
+  assert.deepEqual(studyStreak(records, new Date(2026, 10, 1)), {
+    current: 0,
+    longest: 2,
+    answeredToday: 0,
+  });
+});
+
+test('study streak handles empty history and a new run after a gap', () => {
+  const now = new Date(2026, 10, 2, 12);
+  const q = questions[0];
+  const at = (day: number) => new Date(2026, 10, day, 8).toISOString();
+  const records = [
+    attempt('today', q.id, true, at(2)),
+    attempt('old', q.id, true, at(0)),
+    attempt('future', q.id, false, at(3)),
+    attempt('older', q.id, false, at(-1)),
+  ];
+  assert.deepEqual(studyStreak([], now), { current: 0, longest: 0, answeredToday: 0 });
+  assert.deepEqual(studyStreak(records, now), { current: 1, longest: 2, answeredToday: 1 });
+});
+
+test('only the first saved answer on the current local day qualifies for the celebration', () => {
+  const now = new Date(2026, 10, 11, 10);
+  const question = questions[0].id;
+  const record = (id: string, day: number) =>
+    attempt(id, question, false, new Date(2026, 10, day, 9).toISOString());
+  const yesterday = record('yesterday', 10);
+  const saved = record('first-today', 11);
+  const daily = firstDailyStreakSave([yesterday], saved, now);
+  assert.ok(daily);
+  assert.equal(daily.streak.current, 2);
+  assert.equal(daily.date, '2026-11-11');
+  assert.equal(firstDailyStreakSave([yesterday, saved], record('second-today', 11), now), null);
+  assert.equal(firstDailyStreakSave([saved], saved, now), null);
+  assert.equal(firstDailyStreakSave([], yesterday, now), null);
+});
+
+test('the seven-day streak row includes repeats, missed days, and today in order', () => {
+  const now = new Date(2026, 10, 2, 12);
+  const question = questions[0].id;
+  const record = (id: string, day: number) =>
+    attempt(id, question, false, new Date(2026, 10, day, 9).toISOString());
+  const week = studyStreakWeek(
+    [record('last-week', -7), record('october', -3), record('first', 2), record('repeat', 2)],
+    now,
+  );
+  assert.equal(week.length, 7);
+  assert.equal(week[0].date, '2026-10-27');
+  assert.deepEqual(
+    week.filter((day) => day.practiced).map((day) => day.date),
+    ['2026-10-28', '2026-11-02'],
+  );
+  assert.deepEqual(
+    week.filter((day) => day.today).map((day) => day.date),
+    ['2026-11-02'],
+  );
+  assert.equal(week[5].practiced, false);
 });

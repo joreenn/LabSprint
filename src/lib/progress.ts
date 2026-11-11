@@ -73,6 +73,73 @@ export function localDay(iso: string) {
   const d = new Date(iso);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
+// Convert the device-local calendar date to a day index. The UTC arithmetic
+// compares calendar dates rather than elapsed hours across daylight-saving changes.
+function studyDayIndex(date: Date) {
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000;
+}
+
+export function studyStreak(attempts: readonly AttemptRecord[], now = new Date()) {
+  const today = studyDayIndex(now);
+  const days = new Set<number>();
+  let answeredToday = 0;
+
+  for (const attempt of attempts) {
+    const day = studyDayIndex(new Date(attempt.createdAt));
+    if (!Number.isFinite(day) || day > today) continue;
+    days.add(day);
+    if (day === today) answeredToday++;
+  }
+
+  let current = 0;
+  let longest = 0;
+  let run = 0;
+  let previous = -Infinity;
+  for (const day of [...days].sort((a, b) => a - b)) {
+    run = day === previous + 1 ? run + 1 : 1;
+    longest = Math.max(longest, run);
+    previous = day;
+  }
+  // Yesterday's streak stays active until the learner misses an entire day.
+  if (previous >= today - 1) current = run;
+  return { current, longest, answeredToday };
+}
+
+export function studyStreakWeek(attempts: readonly AttemptRecord[], now = new Date()) {
+  const studied = new Set(attempts.map((attempt) => studyDayIndex(new Date(attempt.createdAt))));
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(now);
+    date.setDate(date.getDate() + index - 6);
+    return {
+      date: localDay(date.toISOString()),
+      weekday: date.toLocaleDateString('en', { weekday: 'short' }),
+      label: date.toLocaleDateString('en', { weekday: 'long', month: 'short', day: 'numeric' }),
+      practiced: studied.has(studyDayIndex(date)),
+      today: index === 6,
+    };
+  });
+}
+
+export function firstDailyStreakSave(
+  history: readonly AttemptRecord[],
+  saved: AttemptRecord,
+  now = new Date(),
+) {
+  const today = studyDayIndex(now);
+  if (
+    studyDayIndex(new Date(saved.createdAt)) !== today ||
+    history.some((attempt) => studyDayIndex(new Date(attempt.createdAt)) === today)
+  )
+    return null;
+
+  const attempts = [...history, saved];
+  return {
+    date: localDay(now.toISOString()),
+    streak: studyStreak(attempts, now),
+    week: studyStreakWeek(attempts, now),
+  };
+}
+
 export function dailyProgress(attempts: AttemptRecord[], now = new Date()) {
   const first = firstAttempts(attempts);
   return Array.from({ length: 7 }, (_, i) => {
