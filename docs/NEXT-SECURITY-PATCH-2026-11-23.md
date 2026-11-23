@@ -19,6 +19,12 @@ The [vendor November security release](https://nextjs.org/blog/november-2026-sec
 
 ## Publication checkpoint
 
-Implementation and checks are complete. Commit/push and the production release are pending. Publish only the exact committed app/configuration allowlist. Do not publish pending local features, question additions, audit notes, credentials, databases, or source books. No migration is required.
+**Complete, committed, pushed, and live.** Runtime commit `10edccc80859bec4f86696d0a187438cd973f3b0` (`fix: patch Next.js security advisories`) is on `main`. Vercel deployment `dpl_A8EcK5MnGhfs1mZRfnjk26vwtzsw` reached READY in approximately 61 seconds, with matching source metadata, no alias error, and [labsprint.vercel.app](https://labsprint.vercel.app) assigned.
+
+Uploaded 77 explicitly allowed committed application/configuration files. Pending local features, the 24-question expansion, audit notes, credentials, databases, and source books were excluded. No migration was performed.
+
+Read-only hosted verification returned HTTP 200 for home and the anonymous auth-session endpoint. Sixteen public static assets loaded, retained the streak implementation, and did not contain the unreleased question IDs or follow-up/session-history UI. No learner account or progress writes were performed.
+
+The short deployment log scan showed two existing PostgreSQL driver SSL compatibility notices on stderr, categorized by Vercel as errors. The checked session endpoint responded successfully. This patch does not change database SSL settings or establish full runtime/security coverage. No required work remains for this framework patch.
 
 Local evidence is under ignored `tmp/next-security-patch/`; its verification-stage record identifies the disposable committed-source copy. The separate security audit remains at its existing checkpoint.
