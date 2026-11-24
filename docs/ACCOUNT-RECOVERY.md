@@ -61,3 +61,7 @@ No production email, recovery token, code, password, or learner account is used 
 [The recovery security regressions](../tests/recovery-security.test.ts) pause real password verification at a deterministic barrier and complete recovery before resuming it. They cover stale sign-in after saved-code and email-token recovery, stale password changes, preservation of the owner's new session, legitimate password changes, direct server API sign-in, denied-IP isolation, saturated counters, and bounded expiry cleanup. These implementation tests use disposable local PGlite state and dummy credentials. They do not establish deployed PostgreSQL concurrency, ingress policy, inbox delivery, or completion of the separate security audit.
 
 Actual inbox delivery remains unverified without the owner's verified sender and configured email service. Passing mocked transport tests is not a delivery claim.
+
+## Owner decision — 2026-11-24
+
+The owner confirmed that no sending domain is available yet. Keep saved recovery codes enabled and email delivery disabled until the setup above is completed. A Vercel subdomain alone does not give control over its email DNS. No mail service, DNS, secrets, email-verification requirement or existing-account access was changed for the priorities 2–6 release. The remaining delivery checklist is an external prerequisite, not a completed feature.

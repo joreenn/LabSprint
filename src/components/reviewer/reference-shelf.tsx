@@ -1,5 +1,7 @@
 import { BookOpen, ChevronDown } from 'lucide-react';
 import { questions, subjects } from '@/content/questions';
+import { editorialStatus } from '@/content/editorial-review';
+import { topicCoverage } from '@/content/validation';
 import { expansionCoverage } from '@/content/coverage';
 
 export function ReferenceShelf() {
@@ -19,6 +21,8 @@ export function ReferenceShelf() {
       ],
     };
   });
+  const reviewed = questions.filter((question) => editorialStatus(question) === 'approved').length;
+  const gaps = topicCoverage(questions, subjects).filter((row) => row.count === 0);
   return (
     <details className="panel reference-shelf">
       <summary>
@@ -30,9 +34,19 @@ export function ReferenceShelf() {
         <ChevronDown size={17} />
       </summary>
       <p>
-        Original questions with a checked reference on every explanation. The shelf grows as more
-        material is reviewed.
+        Original practice questions with checked source references. {reviewed} of {questions.length}{' '}
+        current question versions have independent academic approval recorded. Source checks alone
+        are not independent MLS review.
       </p>
+      {gaps.length ? (
+        <div className="quiet-note">
+          <p>
+            <strong>Content still needed:</strong>{' '}
+            {gaps.map((row) => `${row.topic} (0 questions)`).join(', ')}. These topics are not
+            covered by the current bank.
+          </p>
+        </div>
+      ) : null}
       <div className="reference-sources">
         {sources.map((source) => (
           <article key={source.title + source.edition}>

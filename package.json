@@ -1,6 +1,6 @@
 {
   "name": "labsprint",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "private": true,
   "engines": {
     "node": "24.x"
@@ -13,6 +13,7 @@
     "format": "prettier --write src tests scripts docs README.md next.config.ts package.json tsconfig.json",
     "format:check": "prettier --check src tests scripts docs README.md next.config.ts package.json tsconfig.json",
     "test": "tsx --test tests/*.test.ts",
+    "content:reports": "tsx scripts/export-content-reports.ts",
     "content:check": "tsx scripts/validate-content.ts",
     "db:migrate": "tsx scripts/migrate.ts"
   },

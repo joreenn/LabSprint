@@ -57,6 +57,7 @@ export const practiceInput = z
   .object({
     id: stableId,
     replaceSessionId: stableId.nullable().optional(),
+    newOnly: z.boolean().optional(),
     questionIds: z
       .array(questionId)
       .min(1)

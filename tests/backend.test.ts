@@ -15,6 +15,7 @@ test('database auth, answer validation, idempotency, account isolation and resum
   const workspace = await import('../src/lib/server/workspace');
   const { attemptInput, settingsInput, scoreAnswer } = await import('../src/lib/server/validation');
   const { GET: workspaceRoute } = await import('../src/app/api/workspace/route');
+  const { GET: historyRoute } = await import('../src/app/api/practice-history/route');
   const { POST: bookmarkRoute } = await import('../src/app/api/bookmarks/route');
   const { POST: attemptRoute } = await import('../src/app/api/attempts/route');
   const { PUT: appearanceRoute } = await import('../src/app/api/appearance/route');
@@ -57,6 +58,18 @@ test('database auth, answer validation, idempotency, account isolation and resum
     assert.notEqual(account.password, 'Test-only-password-2026');
     const unauthorized = await workspaceRoute(new Request('http://127.0.0.1:3000/api/workspace'));
     assert.equal(unauthorized.status, 401);
+    assert.equal(
+      (await historyRoute(new Request('http://127.0.0.1:3000/api/practice-history'))).status,
+      401,
+    );
+    const emptyHistory = await historyRoute(
+      new Request('http://127.0.0.1:3000/api/practice-history', {
+        headers: { cookie: one.cookie },
+      }),
+    );
+    assert.equal(emptyHistory.status, 200);
+    assert.equal(emptyHistory.headers.get('cache-control'), 'private, no-store');
+    assert.deepEqual(await emptyHistory.json(), { sessions: [], nextCursor: null });
     const hostile = await bookmarkRoute(
       new Request('http://127.0.0.1:3000/api/bookmarks', {
         method: 'POST',
@@ -188,6 +201,19 @@ test('database auth, answer validation, idempotency, account isolation and resum
       answers: {},
       replaceSessionId: sessionId,
     };
+    await assert.rejects(
+      () => workspace.savePractice(one.user.id, { ...newerSession, newOnly: true }),
+      /selected questions are already answered/,
+    );
+    assert.equal((await workspace.getWorkspace(one.user)).activeSession?.id, sessionId);
+    const unseenForOther = await workspace.savePractice(two.user.id, {
+      ...newerSession,
+      id: randomUUID(),
+      replaceSessionId: null,
+      newOnly: true,
+    });
+    assert.deepEqual(unseenForOther.questionIds, [question.id]);
+    await workspace.clearPractice(two.user.id, unseenForOther.id);
     await workspace.savePractice(one.user.id, newerSession);
     await assert.rejects(
       () =>

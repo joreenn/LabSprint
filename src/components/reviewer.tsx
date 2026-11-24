@@ -24,7 +24,15 @@ import {
 import { authClient } from '@/lib/auth-client';
 import { questions, subjects } from '@/content/questions';
 import type { Question } from '@/content/types';
-import { firstDailyStreakSave, latestAttempts, questionMap, shuffled } from '@/lib/progress';
+import {
+  addStudyActivity,
+  afterHistory,
+  firstDailyStreakSave,
+  latestAttempts,
+  questionMap,
+  shuffled,
+  localDay,
+} from '@/lib/progress';
 import type { View, PracticeSession, Workspace } from './reviewer/types';
 import { api, ApiError } from './reviewer/api';
 import { nav, Brand } from './reviewer/shared';
@@ -48,22 +56,18 @@ import {
   type Appearance,
 } from '@/lib/appearance';
 import { StudyTimer } from './reviewer/study-timer';
-import { sessionRecap } from '@/lib/practice-review';
+import { sessionRecap, type PracticeConfig } from '@/lib/practice-review';
 import { usePracticeOutbox } from './reviewer/use-practice-outbox';
 import { StreakCelebration, type DailyStreakCelebration } from './reviewer/study-streak';
 import './reviewer/update.css';
 import './reviewer/usability.css';
+import './reviewer/follow-ups.css';
 export default function Reviewer() {
   const { data: session, isPending } = authClient.useSession();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [view, setView] = useState<View>('dashboard');
   const [active, setActive] = useState<PracticeSession | null>(null);
-  const [setup, setSetup] = useState<{
-    subjectId?: string;
-    topic?: string;
-    ids?: string[];
-    label?: string;
-  } | null>(null);
+  const [setup, setSetup] = useState<PracticeConfig | null>(null);
   const [error, setError] = useState('');
   const [toast, setToast] = useState('');
   const [loading, setLoading] = useState(false);
@@ -78,29 +82,45 @@ export default function Reviewer() {
   const [recoveryRemaining, setRecoveryRemaining] = useState<number | null>(null);
   const [celebration, setCelebration] = useState<DailyStreakCelebration | null>(null);
   const lastCelebratedDay = useRef<string | null>(null);
+  const pendingCelebration = useRef<{ sessionId: string; value: DailyStreakCelebration } | null>(
+    null,
+  );
   const loaded = useRef(false);
   const currentUser = useRef<string | undefined>(undefined);
   const bookmarkPending = useRef(new Set<string>());
   const answerLock = useRef(new Set<string>());
   const outbox = usePracticeOutbox(session?.user.id, (task, result) => {
     if (!result || task.kind !== 'answer') return;
-    if (view === 'practice' && workspace && active?.id === task.sessionId && !report) {
-      const daily = firstDailyStreakSave(workspace.attempts, result.attempt);
-      if (daily && daily.date !== lastCelebratedDay.current) {
-        lastCelebratedDay.current = daily.date;
-        setCelebration(daily);
-      }
+    if (
+      view === 'practice' &&
+      workspace &&
+      active?.id === task.sessionId &&
+      (!pendingCelebration.current ||
+        pendingCelebration.current.value.date !== localDay(new Date().toISOString()))
+    ) {
+      const daily = firstDailyStreakSave(
+        workspace.attempts,
+        result.attempt,
+        new Date(),
+        workspace.activity,
+      );
+      if (daily && daily.date !== lastCelebratedDay.current)
+        pendingCelebration.current = { sessionId: task.sessionId, value: daily };
     }
-    setWorkspace((w) =>
-      w
-        ? {
-            ...w,
-            attempts: w.attempts.some((a) => a.id === result.attempt.id)
-              ? w.attempts
-              : [...w.attempts, result.attempt],
-          }
-        : w,
-    );
+    setWorkspace((w) => {
+      if (!w || w.attempts.some((a) => a.id === result.attempt.id)) return w;
+      const baseline = w.attempts.find(
+        (a) => a.questionId === result.attempt.questionId && a.history,
+      );
+      const alreadyCounted =
+        baseline?.history && !afterHistory(result.attempt, baseline.history.through);
+      return {
+        ...w,
+        attempts: [...w.attempts, result.attempt],
+        activity:
+          w.activity && !alreadyCounted ? addStudyActivity(w.activity, result.attempt) : w.activity,
+      };
+    });
     setActive((current) =>
       current?.id === task.sessionId
         ? {
@@ -115,7 +135,8 @@ export default function Reviewer() {
     const requestedUser = currentUser.current;
     try {
       await outbox.flush();
-      const data = await api<Workspace>('/api/workspace');
+      const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const data = await api<Workspace>(`/api/workspace?timeZone=${encodeURIComponent(zone)}`);
       if (currentUser.current !== requestedUser) return false;
       // Retain any unsent choices restored from this device; the sync banner
       // keeps them visibly separate from server-acknowledged progress.
@@ -163,6 +184,7 @@ export default function Reviewer() {
     setRecoveryRemaining(null);
     setCelebration(null);
     lastCelebratedDay.current = null;
+    pendingCelebration.current = null;
     answerLock.current.clear();
     loaded.current = false;
     if (session?.user.id) void refresh();
@@ -259,7 +281,7 @@ export default function Reviewer() {
     if (error instanceof ApiError && error.status === 409) await refresh();
     setError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
   };
-  const startPractice = async (ids: string[]) => {
+  const startPractice = async (ids: string[], newOnly: boolean) => {
     setLoading(true);
     setError('');
     try {
@@ -275,7 +297,11 @@ export default function Reviewer() {
         index: 0,
         answers: {},
       };
-      await api('/api/practice-session', 'PUT', { ...next, replaceSessionId: active?.id ?? null });
+      await api('/api/practice-session', 'PUT', {
+        ...next,
+        replaceSessionId: active?.id ?? null,
+        newOnly,
+      });
       setActive(next);
       setWorkspace((w) => (w ? { ...w, activeSession: next } : w));
       setSetup(null);
@@ -294,6 +320,30 @@ export default function Reviewer() {
     setActive(null);
     setWorkspace((w) => (w ? { ...w, activeSession: null } : w));
     window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+  // Saving an answer never interrupts its explanation. Celebrate only after
+  // the learner explicitly continues, and only after the answer is acknowledged.
+  const continuePractice = (done: boolean) => {
+    if (!active) return;
+    const currentId = active.questionIds[active.index];
+    if (questionMap.has(currentId) && !active.answers[currentId]) return;
+    if (done) finish();
+    else {
+      const next = { ...active, index: Math.min(active.index + 1, active.questionIds.length - 1) };
+      setActive(next);
+      setWorkspace((w) => (w ? { ...w, activeSession: next } : w));
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+    const pending = pendingCelebration.current;
+    if (
+      pending?.sessionId === active.id &&
+      pending.value.date === localDay(new Date().toISOString()) &&
+      pending.value.date !== lastCelebratedDay.current
+    ) {
+      lastCelebratedDay.current = pending.value.date;
+      pendingCelebration.current = null;
+      setCelebration(pending.value);
+    }
   };
   const answer = (question: Question, optionId: string) => {
     if (!active || active.answers[question.id]) return;
@@ -569,6 +619,7 @@ export default function Reviewer() {
                     .filter((row) => !row.correct)
                     .map((row) => row.question.id),
                   label: 'Session mistakes',
+                  review: true,
                 });
               }}
             />
@@ -581,17 +632,8 @@ export default function Reviewer() {
                 .filter((t) => t.kind === 'answer')
                 .map((t) => t.questionId)}
               onAnswer={answer}
-              onNext={() => {
-                if (!active.answers[active.questionIds[active.index]]) return;
-                const next = {
-                  ...active,
-                  index: Math.min(active.index + 1, active.questionIds.length - 1),
-                };
-                setActive(next);
-                setWorkspace((w) => (w ? { ...w, activeSession: next } : w));
-                window.scrollTo({ top: 0, behavior: 'instant' });
-              }}
-              onFinish={finish}
+              onNext={() => void continuePractice(false)}
+              onFinish={() => void continuePractice(true)}
               onPause={() => {
                 changeView('dashboard');
                 setToast('Practice paused. Resume whenever you’re ready.');
@@ -703,6 +745,10 @@ export default function Reviewer() {
         <PracticeSetup
           config={setup}
           active={active}
+          attempts={workspace.attempts}
+          pendingQuestionIds={outbox.tasks.flatMap((task) =>
+            task.kind === 'answer' ? [task.questionId] : [],
+          )}
           busy={loading}
           error={error}
           onClose={() => setSetup(null)}

@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, sql } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { getDb } from '../../db';
 import * as tables from '../../db/schema';
@@ -34,6 +34,7 @@ export async function getPreferences(userId: string) {
     .where(eq(tables.preferences.userId, userId));
   return preferences;
 }
+/** Full-fidelity maintenance/test read. The public workspace route uses compact history. */
 export async function getWorkspace(user: { id: string; name: string; email: string }) {
   const db = await getDb();
   const [attempts, bookmarks, reports, preferences] = await Promise.all([
@@ -157,7 +158,7 @@ export async function recordAttempt(userId: string, input: AttemptInput) {
 }
 export async function savePractice(
   userId: string,
-  input: PracticeSession & { replaceSessionId?: string | null },
+  input: PracticeSession & { replaceSessionId?: string | null; newOnly?: boolean },
 ) {
   const db = await getDb();
   return db.transaction(async (tx) => {
@@ -187,6 +188,23 @@ export async function savePractice(
     }
     if (!sameSession && input.index !== 0)
       throw new HttpError(400, 'A new practice session must start at the first question.');
+    if (!sameSession && input.newOnly) {
+      const [seen] = await tx
+        .select({ id: tables.attempts.id })
+        .from(tables.attempts)
+        .where(
+          and(
+            eq(tables.attempts.userId, userId),
+            inArray(tables.attempts.questionId, input.questionIds),
+          ),
+        )
+        .limit(1);
+      if (seen)
+        throw new HttpError(
+          409,
+          'Some selected questions are already answered. Try again with your updated history.',
+        );
+    }
     const attempts = await tx
       .select()
       .from(tables.attempts)

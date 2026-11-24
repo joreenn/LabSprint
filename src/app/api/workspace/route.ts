@@ -1,4 +1,11 @@
 import { authenticated } from '@/lib/server/http';
-import { getWorkspace } from '@/lib/server/workspace';
+import { getCompactWorkspace, historyTimeZone } from '@/lib/server/history';
 export const dynamic = 'force-dynamic';
-export const GET = authenticated(async (_request, user) => Response.json(await getWorkspace(user)));
+export const GET = authenticated(async (request, user) =>
+  Response.json(
+    await getCompactWorkspace(
+      user,
+      historyTimeZone(new URL(request.url).searchParams.get('timeZone')),
+    ),
+  ),
+);

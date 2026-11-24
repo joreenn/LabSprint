@@ -33,6 +33,8 @@ import { Modal } from './dialogs';
 export function PracticeSetup({
   config,
   active,
+  attempts,
+  pendingQuestionIds,
   busy,
   error,
   onClose,
@@ -40,16 +42,28 @@ export function PracticeSetup({
 }: {
   config: PracticeConfig;
   active: PracticeSession | null;
+  attempts: readonly AttemptRecord[];
+  pendingQuestionIds: readonly string[];
   busy: boolean;
   error?: string;
   onClose: () => void;
-  onStart: (ids: string[]) => void;
+  onStart: (ids: string[], newOnly: boolean) => void;
 }) {
   const [count, setCount] = useState<number | 'all'>(10),
-    [kind, setKind] = useState('mixed');
+    [kind, setKind] = useState('mixed'),
+    [newOnly, setNewOnly] = useState(false);
   const subject = subjects.find((s) => s.id === config.subjectId);
   const single = config.ids?.length === 1;
-  const pool = eligibleQuestions(config, single ? 'mixed' : kind);
+  const canFilterNew = !single && !config.review;
+  const filterNew = canFilterNew && newOnly;
+  const explored = filterNew
+    ? new Set([
+        ...attempts.map((attempt) => attempt.questionId),
+        ...Object.keys(active?.answers ?? {}),
+        ...pendingQuestionIds,
+      ])
+    : undefined;
+  const pool = eligibleQuestions(config, single ? 'mixed' : kind, explored);
   const size = practiceSize(pool.length, count);
   const title = single ? 'Review 1 question' : 'Make room for a little progress.';
   return (
@@ -75,6 +89,20 @@ export function PracticeSetup({
           </select>
         </label>
       ) : null}
+      {canFilterNew ? (
+        <label className="new-practice-filter">
+          <input
+            type="checkbox"
+            checked={newOnly}
+            aria-describedby="practice-pool-status"
+            onChange={(event) => setNewOnly(event.target.checked)}
+          />
+          <span>
+            <strong>New questions only</strong>
+            <small>Skip questions you’ve already answered.</small>
+          </span>
+        </label>
+      ) : null}
       {!single && pool.length > 1 ? (
         <fieldset className="practice-sizes">
           <legend>Session size</legend>
@@ -95,7 +123,8 @@ export function PracticeSetup({
       ) : null}
       <p className="fine-print" id="practice-pool-status" role="status">
         {size.count} {size.count === 1 ? 'question' : 'questions'} in this session
-        {!single ? ` · ${pool.length} eligible` : ''}. Options are shuffled each time.
+        {!single ? ` · ${pool.length} ${filterNew ? 'new' : 'eligible'}` : ''}. Options are shuffled
+        each time.
         {pool.length > 100 ? ' Sessions support up to 100 questions.' : ''}
         {!single ? ' Available reference books are mixed within your selection.' : ''}
       </p>
@@ -113,16 +142,23 @@ export function PracticeSetup({
       <button
         className="button primary wide"
         disabled={busy || pool.length === 0}
-        onClick={() => onStart(referenceMixedSample(pool, size.count).map((q) => q.id))}
+        onClick={() =>
+          onStart(
+            referenceMixedSample(pool, size.count).map((q) => q.id),
+            filterNew,
+          )
+        }
       >
         {busy ? <Loader2 size={17} className="spin" /> : <Play size={17} />}
         {single ? 'Review 1 question' : 'Start practice'} <ArrowRight size={17} />
       </button>
       {pool.length === 0 ? (
         <p role="status" className="inline-warning">
-          {kind !== 'mixed' && !single
-            ? 'No questions match this style yet. Choose a mix of recall and cases, or another topic.'
-            : 'No questions are available in this selection. Choose another topic or open the question library.'}
+          {filterNew
+            ? 'No new questions match this selection. Turn off New questions only or change your filters.'
+            : kind !== 'mixed' && !single
+              ? 'No questions match this style yet. Choose a mix of recall and cases, or another topic.'
+              : 'No questions are available in this selection. Choose another topic or open the question library.'}
         </p>
       ) : null}
     </Modal>
@@ -400,121 +436,139 @@ export function SessionSummary({
         Session accuracy includes repeats. First-attempt results stay separate. An immediate
         correction shows practice improvement, not lasting mastery.
       </small>
-      <section className="summary-recap" aria-label="Question recap">
-        <h2>Your question recap</h2>
-        <p className="fine-print">Open any explanation without recording another answer.</p>
-        {session.questionIds.map((id, index) => {
-          const q = questionMap.get(id);
-          const row = recap.find((entry) => entry.question.id === id);
-          if (!q)
-            return (
-              <p key={id} className="quiet-note">
-                Question {index + 1} is no longer available in this bank. Saved history is
-                preserved.
-              </p>
-            );
-          const subject = subjects.find((s) => s.id === q.subjectId);
-          const pending = pendingQuestionIds.includes(id) || (!!row && !row.recorded);
+      <QuestionRecap
+        questionIds={session.questionIds}
+        rows={recap}
+        pendingQuestionIds={pendingQuestionIds}
+      />
+    </section>
+  );
+}
+
+export function QuestionRecap({
+  questionIds,
+  rows,
+  pendingQuestionIds = [],
+}: {
+  questionIds: readonly string[];
+  rows: ReturnType<typeof sessionRecap>;
+  pendingQuestionIds?: readonly string[];
+}) {
+  const byId = new Map(rows.map((row) => [row.question.id, row]));
+  return (
+    <section className="summary-recap" aria-label="Question recap">
+      <h2>Your question recap</h2>
+      <p className="fine-print">Open any explanation without recording another answer.</p>
+      {questionIds.map((id, index) => {
+        const q = questionMap.get(id);
+        const row = byId.get(id);
+        if (!q)
           return (
-            <details className="recap-question" key={id}>
-              <summary>
-                <span className="recap-topic">
-                  <strong>
-                    {index + 1}. {subject?.shortName || q.subjectId}
-                  </strong>
-                  <span>{q.topic}</span>
-                </span>
-                <span
-                  className={`recap-result ${row?.correct ? 'recap-correct' : row ? 'recap-missed' : ''}`}
-                >
-                  {row ? (
-                    row.correct ? (
-                      <CheckCircle2 size={18} />
-                    ) : (
-                      <XCircle size={18} />
-                    )
+            <p key={id} className="quiet-note">
+              Question {index + 1} is no longer available in this bank. Saved history is preserved.
+            </p>
+          );
+        const subject = subjects.find((s) => s.id === q.subjectId);
+        const pending = pendingQuestionIds.includes(id) || (!!row && !row.recorded);
+        return (
+          <details className="recap-question" key={id}>
+            <summary>
+              <span className="recap-topic">
+                <strong>
+                  {index + 1}. {subject?.shortName || q.subjectId}
+                </strong>
+                <span>{q.topic}</span>
+              </span>
+              <span
+                className={`recap-result ${row?.correct ? 'recap-correct' : row ? 'recap-missed' : ''}`}
+              >
+                {row ? (
+                  row.correct ? (
+                    <CheckCircle2 size={18} />
                   ) : (
-                    <CircleHelp size={18} />
-                  )}
-                  {row ? (row.correct ? 'Correct' : 'Missed') : 'Not answered'}
-                  <small>
-                    {row
-                      ? `${row.attemptKind}${pending ? ' · awaiting sync' : ''}`
-                      : 'No attempt recorded'}
-                  </small>
-                </span>
-                <span className="recap-open-label">View explanation</span>
-              </summary>
-              <div className="recap-detail">
-                {row?.explanationVersionChanged ? (
-                  <p className="fine-print">
-                    Saved result from v{row.savedVersion}; explanations below are from the current v
-                    {q.version}. Your original result is preserved.
-                  </p>
-                ) : null}
-                {row?.savedChoiceUnavailable ? (
-                  <p className="fine-print">
-                    Your saved choice is no longer available in this version. The recorded result is
-                    preserved; the explanations below describe the current options.
-                  </p>
-                ) : null}
-                <h3>{q.stem}</h3>
-                <div className="takeaway">
-                  <Sparkles size={18} />
-                  <div>
-                    <strong>THE TAKEAWAY</strong>
-                    <p>{q.takeaway}</p>
-                  </div>
-                </div>
-                <div className="option-rationales">
-                  {q.options.map((option) => (
-                    <div
-                      key={option.id}
-                      className={option.id === q.correctOptionId ? 'right-reason' : ''}
-                    >
-                      <span className="reason-letter" aria-hidden="true">
-                        {option.id === q.correctOptionId ? (
-                          <CheckCircle2 size={16} />
-                        ) : option.id === row?.chosen ? (
-                          <XCircle size={16} />
-                        ) : (
-                          '•'
-                        )}
-                      </span>
-                      <div>
-                        <strong>
-                          {option.text}{' '}
-                          {option.id === q.correctOptionId ? (
-                            <span className="reason-badge">Correct answer</span>
-                          ) : null}{' '}
-                          {option.id === row?.chosen ? (
-                            <span className="reason-badge">Your answer</span>
-                          ) : null}
-                        </strong>
-                        <p>{option.rationale}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="source-box">
-                  <BookOpen size={17} />
-                  <div>
-                    <strong>Reference</strong>
-                    <p>
-                      {q.source.title}
-                      {q.source.edition ? `, ${q.source.edition}` : ''} · {q.source.chapter} · PDF
-                      page {q.source.pdfPage}
-                    </p>
-                    <small>
-                      Original practice question · {q.id} · v{q.version}
-                    </small>
-                  </div>
+                    <XCircle size={18} />
+                  )
+                ) : (
+                  <CircleHelp size={18} />
+                )}
+                {row ? (row.correct ? 'Correct' : 'Missed') : 'Not answered'}
+                <small>
+                  {row
+                    ? `${row.attemptKind}${pending ? ' · awaiting sync' : ''}`
+                    : 'No attempt recorded'}
+                </small>
+              </span>
+              <span className="recap-open-label">View explanation</span>
+            </summary>
+            <div className="recap-detail">
+              {row?.explanationVersionChanged ? (
+                <p className="fine-print">
+                  Saved result from v{row.savedVersion}; explanations below are from the current v
+                  {q.version}. Your original result is preserved.
+                </p>
+              ) : null}
+              {row?.savedChoiceUnavailable ? (
+                <p className="fine-print">
+                  Your saved choice is no longer available in this version. The recorded result is
+                  preserved; the explanations below describe the current options.
+                </p>
+              ) : null}
+              <h3>{q.stem}</h3>
+              <div className="takeaway">
+                <Sparkles size={18} />
+                <div>
+                  <strong>THE TAKEAWAY</strong>
+                  <p>{q.takeaway}</p>
                 </div>
               </div>
-            </details>
-          );
-        })}
-      </section>
+              <div className="option-rationales">
+                {q.options.map((option) => (
+                  <div
+                    key={option.id}
+                    className={option.id === q.correctOptionId ? 'right-reason' : ''}
+                  >
+                    <span className="reason-letter" aria-hidden="true">
+                      {option.id === q.correctOptionId ? (
+                        <CheckCircle2 size={16} />
+                      ) : option.id === row?.chosen ? (
+                        <XCircle size={16} />
+                      ) : (
+                        '•'
+                      )}
+                    </span>
+                    <div>
+                      <strong>
+                        {option.text}{' '}
+                        {option.id === q.correctOptionId ? (
+                          <span className="reason-badge">Correct answer</span>
+                        ) : null}{' '}
+                        {option.id === row?.chosen ? (
+                          <span className="reason-badge">Your answer</span>
+                        ) : null}
+                      </strong>
+                      <p>{option.rationale}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="source-box">
+                <BookOpen size={17} />
+                <div>
+                  <strong>Reference</strong>
+                  <p>
+                    {q.source.title}
+                    {q.source.edition ? `, ${q.source.edition}` : ''} · {q.source.chapter} · PDF
+                    page {q.source.pdfPage}
+                  </p>
+                  <small>
+                    Original practice question · {q.id} · v{q.version}
+                  </small>
+                </div>
+              </div>
+            </div>
+          </details>
+        );
+      })}
     </section>
   );
 }

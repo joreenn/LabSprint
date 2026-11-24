@@ -27,6 +27,7 @@ import { questions, subjects } from '@/content/questions';
 import type { Question, Subject } from '@/content/types';
 import {
   dailyProgress,
+  everMissedQuestionIds,
   firstAttempts,
   latestAttempts,
   percent,
@@ -42,6 +43,8 @@ import { Practice } from './practice';
 import { ReferenceShelf } from './reference-shelf';
 import { ProgressFacts, ProgressGuide } from './progress-signals';
 import { StudyStreakCard } from './study-streak';
+import { SessionHistory } from './session-history';
+import { FOLLOW_UP_DAYS, scheduledReviews, type PracticeConfig } from '@/lib/practice-review';
 
 export function Dashboard({
   workspace: w,
@@ -59,7 +62,7 @@ export function Dashboard({
   const now = new Date();
   const p = progressFor(w.attempts);
   const first = firstAttempts(w.attempts);
-  const streak = studyStreak(w.attempts, now);
+  const streak = studyStreak(w.attempts, now, w.activity);
   const today = streak.answeredToday;
   const suggestion = suggestedSubject(w.attempts);
   return (
@@ -136,7 +139,7 @@ export function Dashboard({
               ? 'Goal met. Nice work!'
               : `${w.settings.dailyGoal - today} more to your daily goal`}
           </div>
-          <StudyStreakCard streak={streak} week={studyStreakWeek(w.attempts, now)} />
+          <StudyStreakCard streak={streak} week={studyStreakWeek(w.attempts, now, w.activity)} />
         </section>
       </div>
       <div className="stats-grid">
@@ -361,21 +364,26 @@ export function ReviewQueue({
   onBookmark,
 }: {
   workspace: Workspace;
-  onPractice: (v: { ids: string[]; label: string }) => void;
+  onPractice: (config: PracticeConfig) => void;
   onBookmark: (id: string) => void;
 }) {
-  const [tab, setTab] = useState('missed');
+  const [tab, setTab] = useState<'missed' | 'due' | 'recovered' | 'saved'>('missed');
+  const now = Date.now();
+  const followUps = scheduledReviews(w.attempts, now);
+  const due = followUps.filter((item) => item.dueAt <= now);
+  const upcoming = followUps.find((item) => item.dueAt > now);
   const latest = latestAttempts(w.attempts),
-    everMissed = new Set(w.attempts.filter((a) => !a.correct).map((a) => a.questionId));
-  const ids =
-    tab === 'saved'
-      ? w.bookmarks
-      : tab === 'recovered'
-        ? [...latest.values()]
-            .filter((a) => a.correct && everMissed.has(a.questionId))
-            .map((a) => a.questionId)
-        : [...latest.values()].filter((a) => !a.correct).map((a) => a.questionId);
-  const availableIds = ids.filter((id) => questionMap.has(id));
+    everMissed = everMissedQuestionIds(w.attempts);
+  const missed = [...latest.values()].filter((a) => !a.correct).map((a) => a.questionId);
+  const lists = {
+    missed,
+    due: due.map((item) => item.questionId),
+    recovered: [...latest.values()]
+      .filter((a) => a.correct && everMissed.has(a.questionId))
+      .map((a) => a.questionId),
+    saved: w.bookmarks,
+  };
+  const availableIds = lists[tab].filter((id) => questionMap.has(id));
   const p = progressFor(w.attempts);
   return (
     <>
@@ -390,28 +398,78 @@ export function ReviewQueue({
               onClick={() =>
                 onPractice({
                   ids: availableIds,
-                  label: tab === 'saved' ? 'Bookmarked questions' : 'Review queue',
+                  label:
+                    tab === 'due'
+                      ? 'Due for review'
+                      : tab === 'saved'
+                        ? 'Bookmarked questions'
+                        : 'Review queue',
+                  review: true,
                 })
               }
             >
               <Play size={17} />
-              Practice this list
+              {tab === 'due' ? 'Practice due questions' : 'Practice this list'}
             </button>
           ) : undefined
         }
       />
-      <div className="tab-bar">
-        <button className={tab === 'missed' ? 'active' : ''} onClick={() => setTab('missed')}>
-          Needs another look <span>{[...latest.values()].filter((a) => !a.correct).length}</span>
+      <div className="tab-bar" role="group" aria-label="Review lists">
+        <button
+          className={tab === 'missed' ? 'active' : ''}
+          aria-pressed={tab === 'missed'}
+          onClick={() => setTab('missed')}
+        >
+          Needs another look <span>{missed.length}</span>
         </button>
-        <button className={tab === 'recovered' ? 'active' : ''} onClick={() => setTab('recovered')}>
+        <button
+          className={tab === 'due' ? 'active' : ''}
+          aria-pressed={tab === 'due'}
+          onClick={() => setTab('due')}
+        >
+          Due for review <span>{due.length}</span>
+        </button>
+        <button
+          className={tab === 'recovered' ? 'active' : ''}
+          aria-pressed={tab === 'recovered'}
+          onClick={() => setTab('recovered')}
+        >
           Previously missed → corrected <span>{p.corrected}</span>
         </button>
-        <button className={tab === 'saved' ? 'active' : ''} onClick={() => setTab('saved')}>
+        <button
+          className={tab === 'saved' ? 'active' : ''}
+          aria-pressed={tab === 'saved'}
+          onClick={() => setTab('saved')}
+        >
           Bookmarks <Bookmark size={15} />
         </button>
       </div>
-      <ProgressGuide stats={p} />
+      {tab === 'due' ? (
+        <div className="panel follow-up-note">
+          <strong>
+            {due.length ? 'A second look, after a little space' : 'You’re caught up for now'}
+          </strong>
+          <p>
+            A missed question comes back after {FOLLOW_UP_DAYS} days, even if you correct it right
+            away. Answer it correctly when it’s due to clear that follow-up.
+          </p>
+          {upcoming ? (
+            <p>
+              Next follow-up:{' '}
+              <time dateTime={new Date(upcoming.dueAt).toISOString()}>
+                {new Date(upcoming.dueAt).toLocaleString('en', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
+              </time>
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <ProgressGuide stats={p} />
+      )}
       {availableIds.length ? (
         <div className="question-list">
           {availableIds.map((id) => {
@@ -422,12 +480,12 @@ export function ReviewQueue({
                 question={q}
                 marked={w.bookmarks.includes(id)}
                 onBookmark={() => onBookmark(id)}
-                onPractice={() => onPractice({ ids: [id], label: 'Question review' })}
+                onPractice={() => onPractice({ ids: [id], label: 'Question review', review: true })}
               />
             ) : null;
           })}
         </div>
-      ) : (
+      ) : tab === 'due' ? null : (
         <Empty
           icon={tab === 'saved' ? Bookmark : BookMarked}
           title={
@@ -453,7 +511,7 @@ export function Progress({ workspace: w }: { workspace: Workspace }) {
   const now = new Date();
   const p = progressFor(w.attempts);
   const days = dailyProgress(w.attempts, now);
-  const streak = studyStreak(w.attempts, now);
+  const streak = studyStreak(w.attempts, now, w.activity);
   const first = firstAttempts(w.attempts);
   const max = Math.max(5, ...days.map((d) => d.count));
   return (
@@ -497,7 +555,7 @@ export function Progress({ workspace: w }: { workspace: Workspace }) {
       </div>
       <ProgressGuide stats={p} />
       <section className="panel trend-panel">
-        <StudyStreakCard streak={streak} week={studyStreakWeek(w.attempts, now)} />
+        <StudyStreakCard streak={streak} week={studyStreakWeek(w.attempts, now, w.activity)} />
         <div className="section-heading">
           <div>
             <h2>A little progress, day by day</h2>
@@ -537,6 +595,7 @@ export function Progress({ workspace: w }: { workspace: Workspace }) {
           First-attempt accuracy · correct/answered beneath each day
         </div>
       </section>
+      <SessionHistory activeSessionId={w.activeSession?.id} />
       <div className="section-heading">
         <div>
           <h2>Know your foundations</h2>
@@ -613,6 +672,16 @@ export function QuestionLibrary({
   const [search, setSearch] = useState(''),
     [subject, setSubject] = useState(''),
     [style, setStyle] = useState('');
+  const [page, setPage] = useState(0);
+  const pageSize = 20;
+  const changePage = (next: number) => {
+    setPage(next);
+    requestAnimationFrame(() => {
+      const results = document.getElementById('library-results');
+      results?.focus({ preventScroll: true });
+      results?.scrollIntoView({ block: 'start' });
+    });
+  };
   const filtered = questions.filter(
     (q) =>
       (!subject || q.subjectId === subject) &&
@@ -633,14 +702,20 @@ export function QuestionLibrary({
           <input
             aria-label="Search questions or topics"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
             placeholder="Search a question or topic…"
           />
         </label>
         <select
           aria-label="Filter by subject"
           value={subject}
-          onChange={(e) => setSubject(e.target.value)}
+          onChange={(e) => {
+            setSubject(e.target.value);
+            setPage(0);
+          }}
         >
           <option value="">All subjects</option>
           {subjects.map((s) => (
@@ -652,14 +727,17 @@ export function QuestionLibrary({
         <select
           aria-label="Filter by question style"
           value={style}
-          onChange={(e) => setStyle(e.target.value)}
+          onChange={(e) => {
+            setStyle(e.target.value);
+            setPage(0);
+          }}
         >
           <option value="">All styles</option>
           <option value="recall">Recall</option>
           <option value="case">Clinical cases</option>
         </select>
       </div>
-      <div className="library-result-count">
+      <div className="library-result-count" id="library-results" tabIndex={-1}>
         <span>
           {filtered.length} {filtered.length === 1 ? 'question' : 'questions'}
         </span>
@@ -676,7 +754,7 @@ export function QuestionLibrary({
       </div>
       {filtered.length ? (
         <div className="question-list">
-          {filtered.map((q) => (
+          {filtered.slice(page * pageSize, (page + 1) * pageSize).map((q) => (
             <QuestionRow
               key={q.id}
               question={q}
@@ -693,6 +771,30 @@ export function QuestionLibrary({
           description="Search a broader topic or choose a different subject."
         />
       )}
+      {filtered.length > pageSize ? (
+        <nav className="library-pagination" aria-label="Question library pages">
+          <button
+            type="button"
+            className="button secondary"
+            disabled={page === 0}
+            onClick={() => changePage(page - 1)}
+          >
+            Previous
+          </button>
+          <span role="status">
+            {page * pageSize + 1}–{Math.min((page + 1) * pageSize, filtered.length)} of{' '}
+            {filtered.length}
+          </span>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={(page + 1) * pageSize >= filtered.length}
+            onClick={() => changePage(page + 1)}
+          >
+            Next
+          </button>
+        </nav>
+      ) : null}
     </>
   );
 }
@@ -788,7 +890,7 @@ export function Preferences({
               Spot something unclear? Flag it from the answer explanation. Question IDs and versions
               make corrections traceable.
             </p>
-            <span className="pill">LabSprint v0.4.3 · Expanding practice bank</span>
+            <span className="pill">LabSprint v0.5.0 · Expanding practice bank</span>
           </section>
           <button className="button secondary" onClick={onSignOut}>
             <LogOut size={17} />

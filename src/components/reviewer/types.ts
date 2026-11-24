@@ -1,5 +1,5 @@
 import { subjects } from '@/content/questions';
-import { type AttemptRecord } from '@/lib/progress';
+import { type AttemptRecord, type StudyActivity } from '@/lib/progress';
 import type { Appearance } from '@/lib/appearance';
 export type View =
   'dashboard' | 'subjects' | 'review' | 'progress' | 'library' | 'settings' | 'practice';
@@ -16,6 +16,7 @@ export type Workspace = {
     email: string;
   };
   attempts: AttemptRecord[];
+  activity?: StudyActivity;
   bookmarks: string[];
   settings: {
     dailyGoal: number;

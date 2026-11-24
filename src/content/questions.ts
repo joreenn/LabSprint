@@ -7,6 +7,7 @@ import { harrLaboratoryQuestions } from './harr-laboratory-questions';
 import { referenceRefreshQuestions } from './reference-refresh-questions';
 import { returnedReviewerQuestions } from './returned-reviewer-questions';
 import { microParasiteContinuation } from './micro-parasite-continuation';
+import { thinTopicQuestions } from './thin-topic-questions';
 
 export const subjects: Subject[] = [
   {
@@ -159,6 +160,7 @@ function item(
 // Original educational items. PDF page numbers are 1-based viewer pages, not printed pages.
 // This starter bank is source-checked but still requires independent faculty review before expansion.
 export const questions: Question[] = [
+  ...thinTopicQuestions,
   ...microParasiteContinuation,
   ...returnedReviewerQuestions,
   ...extraQuestions,

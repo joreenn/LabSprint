@@ -2,7 +2,7 @@
 
 The redesigned streak is live at [labsprint.vercel.app](https://labsprint.vercel.app). Overview and Progress show the current streak, best streak, and seven device-local calendar days of activity. Wrong answers and repeats count; a second answer on the same day does not extend the streak. Yesterday's streak stays active through today, and missing a full day does not erase the best streak.
 
-The first server-confirmed answer of a day during practice opens the celebration. It shows the flame, streak count, and weekly activity for 4.5 seconds, then returns to Overview. There is no close icon. Escape can return early, and reduced-motion preferences disable the decorative animations. A second answer, refresh, or replay of an already-known answer does not celebrate again. The saved session and daily question goal still use existing persistence.
+The first server-confirmed answer of a day queues the celebration. It opens only after the learner presses Next or finishes, so reading the explanation is never interrupted. Continuation stays immediate; an unsaved answer can qualify at a later continuation after acknowledgement, while a session finished before acknowledgement leaves the streak on the persistent card. It shows the flame, streak count, and weekly activity for 4.5 seconds, then returns to Overview. There is no close icon. Escape can return early, and reduced-motion preferences disable the decorative animations. A second answer, refresh, or replay of an already-known answer does not celebrate again. The saved session and daily question goal still use existing persistence.
 
 Theme and palette controls are under Preferences, in the appearance card. The top bar keeps the study timer and mobile library access.
 
@@ -13,3 +13,5 @@ Verification passed: all 13 progress tests, formatting, and the production build
 Publication complete. Runtime commit [d6f7a36](https://github.com/joreenn/LabSprint/commit/d6f7a369017f68971fde01bf07b3dd86b3616271) was pushed to `main`. Vercel deployment `dpl_Bqtvc84dTA2cBtz2AgGFrhgVREkJ` reached READY with the canonical production alias and matching source metadata. Only committed app and configuration files were uploaded.
 
 Read-only live checks returned HTTP 200 for home and the session endpoint, and HTTP 401 for anonymous workspace access. The served assets contain the celebration, timer styling, and relocated appearance controls. The deployment's short log scan showed two PostgreSQL driver SSL compatibility notices classified as errors because they were written to stderr; the session endpoint responded successfully. No production account or progress writes were performed. No implementation or deployment work remains for this update.
+
+The timing change above is part of the v0.5.0 priorities 2–6 release. Historical verification below describes the earlier redesigned animation; current release checks are in PRIORITIES-2-6-CHECKPOINT.md.

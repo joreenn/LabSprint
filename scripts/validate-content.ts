@@ -1,8 +1,12 @@
 import { questions, subjects } from '../src/content/questions';
 import { topicCoverage, validateQuestionBank } from '../src/content/validation';
+import { validateEditorialReviews } from '../src/content/editorial-review';
 import { expansionCoverage } from '../src/content/coverage';
 
-const errors = validateQuestionBank(questions, subjects);
+const errors = [
+  ...validateQuestionBank(questions, subjects),
+  ...validateEditorialReviews(questions),
+];
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exitCode = 1;
